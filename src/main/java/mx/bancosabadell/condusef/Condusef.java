@@ -5,22 +5,26 @@ import org.slf4j.LoggerFactory;
 
 import mx.bancosabadell.condusef.clients.ClientConducef;
 import mx.bancosabadell.condusef.clients.ClientRedeco;
-import mx.bancosabadell.condusef.clients.ClientReune;
 
 /**
  * Hello world!
  *
  */
 public class Condusef{
+
     private static final Logger logger = LoggerFactory.getLogger("condusefLogger");
     public static void main( String[] args ){
         logger.info("Inicio prueba");
 
         ClientConducef redeco = new ClientRedeco();
-        ClientConducef reune = new ClientReune();
+        //ClientConducef reune = new ClientReune();
+        String response = new String();
 
-        redeco.uploadFile(null, null);
-        reune.uploadFile(null, null);
+        
+        response = redeco.postQuejas();
+        
+        
+        System.out.println("Response " + response);
         logger.info("Fin prueba");
     }
 }

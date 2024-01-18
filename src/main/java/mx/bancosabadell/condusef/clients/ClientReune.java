@@ -1,8 +1,5 @@
 package mx.bancosabadell.condusef.clients;
 
-import java.io.File;
-
-import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +11,17 @@ public class ClientReune extends ClientConducef{
     
     private static final Logger logger = LoggerFactory.getLogger("clientReuneLogger");
     @Override
-    public HttpResponse uploadFile(File file,String ulr_service) {
+    public String getQuejas() {
         logger.info("INICIO CARGA Reune " +  ConfigConstants.URL_API_REUNE);
 
         System.out.println("REUNE " + ConfigConstants.URL_API_REUNE);
-        logger.info("FIN CARGA REDECO");
+        logger.info("FIN CARGA Reune");
         return null;
+    }
+    @Override
+    public String postQuejas() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'postQuejas'");
     }
 
 }

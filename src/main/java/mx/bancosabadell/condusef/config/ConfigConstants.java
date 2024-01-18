@@ -24,6 +24,8 @@ public class ConfigConstants {
 
     public static String URL_CONFIG_FILE = "src\\main\\resources\\config.properties";
 
+    public static String HEADER_AUTH = "Authorization";
+
 
     static {
         Properties prop = new Properties();
@@ -44,7 +46,7 @@ public class ConfigConstants {
         CORREO_NOTIF_REDECO = prop.getProperty("mx.bancosabadel.conducef.email_notif_redeco");
         URL_SERV_EMAIL = prop.getProperty("mx.bancosabadel.latinia.url.base");
 
-        URL_BASE = prop.getProperty("mx.bancosabadel.latinia.url.base");
+        URL_BASE = prop.getProperty("mx.bancosabadel.conducef.url.base");
         URL_API_REUNE = prop.getProperty("mx.bancosabadel.conducef.url.api_reune.path");
         URL_API_REDECO = prop.getProperty("mx.bancosabadel.conducef.url.api_redeco.path");
         TOKEN_CONDUSEF = prop.getProperty("mx.bancosabadel.conducef.token");
