@@ -5,11 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import mx.bancosabadell.condusef.clients.ClientConducef;
 import mx.bancosabadell.condusef.clients.ClientRedeco;
+import mx.bancosabadell.condusef.models.ErrorInfoResponse;
+import mx.bancosabadell.condusef.models.ResponseRedeco;
 
-/**
- * Hello world!
- *
- */
 public class Condusef{
 
     private static final Logger logger = LoggerFactory.getLogger("condusefLogger");
@@ -18,13 +16,15 @@ public class Condusef{
 
         ClientConducef redeco = new ClientRedeco();
         //ClientConducef reune = new ClientReune();
-        String response = new String();
 
-        
+       
+        ResponseRedeco response = new ResponseRedeco();        
         response = redeco.postQuejas();
         
-        
-        System.out.println("Response " + response);
+        for ( ErrorInfoResponse string : response.getErrors()) {
+            System.out.println(string.getQueja().getErrors() + " : "+string.getQueja().getQuejasFolio());
+        }   
         logger.info("Fin prueba");
     }
+
 }

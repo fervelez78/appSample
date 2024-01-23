@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
+import mx.bancosabadell.condusef.models.ResponseRedeco;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -26,7 +27,7 @@ public abstract class ClientConducef {
     
     public abstract String getQuejas();
 
-    public abstract String postQuejas();
+    public abstract ResponseRedeco postQuejas();
 
     private final OkHttpClient clientCondusef;
 

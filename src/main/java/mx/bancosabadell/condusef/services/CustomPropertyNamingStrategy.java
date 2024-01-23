@@ -26,7 +26,7 @@ public class CustomPropertyNamingStrategy extends PropertyNamingStrategy {
 
     private String customName(String input) {
         if ("product".equals(input)) {
-            return input; // Mantén 'producto' tal cual
+            return input; 
         }
         return capitalize(input);
     }

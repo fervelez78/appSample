@@ -7,7 +7,7 @@
     <appender name="ClientReune" class="ch.qos.logback.core.FileAppender">
         <file>${ulr_logs}reune-log-${byDate}.log</file>
         <encoder>
-            <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
+            <pattern>%date %level [Proceso REUNE]  %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -15,7 +15,7 @@
     <appender name="ClientRedeco" class="ch.qos.logback.core.FileAppender">
         <file>${ulr_logs}redeco-log-${byDate}.log</file>
         <encoder>
-            <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
+            <pattern>%date %level [Proceso REDECO] %msg%n</pattern>
         </encoder>
     </appender>
 

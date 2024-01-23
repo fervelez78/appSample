@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
+import mx.bancosabadell.condusef.models.ResponseRedeco;
 
 public class ClientReune extends ClientConducef{
 
@@ -19,7 +20,7 @@ public class ClientReune extends ClientConducef{
         return null;
     }
     @Override
-    public String postQuejas() {
+    public ResponseRedeco postQuejas() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'postQuejas'");
     }
