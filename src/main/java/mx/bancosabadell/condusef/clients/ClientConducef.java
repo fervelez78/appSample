@@ -88,29 +88,49 @@ public abstract class ClientConducef {
     
 
     //Metodos http post via OkHttp para la comunicacion con conseft
-    public String post(String url, String token, RequestBody requestBody) throws Exception {
-        
-        //Armar el request
+    public String post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
+        // Armar el request
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
                 .addHeader(ConfigConstants.HEADER_AUTH, token)
                 .build();
-
-        try (Response response = clientCondusef.newCall(request).execute()) {
-            if (!response.isSuccessful()){
-                 // Manejar excepciones de con el servicio api condusef
-                logger.error(response.code() +  " Error en la respuesta HTTP: " + response.message() + " " + response.body().string());
-                throw new Exception("Unexpected code " + response);
+    
+        Response response = null;
+    
+        try {
+            response = clientCondusef.newCall(request).execute();
+    
+            if (!response.isSuccessful()) {
+                
+                 // Manejar excepciones con el servicio API Condusef
+                String responseBody = response.body().string(); // Almacenar el cuerpo en una variable
+                String errorMessage = response.code() + " Error en la respuesta HTTP: " + response.message() + " " + responseBody;
+                logger.error(errorMessage);
+                throw new HttpResponseException(response.code(), response.message(), responseBody);
             }
-            logger.info("Se termina el request con exito " + response.code());
+    
+            logger.info("Se termina el request con éxito " + response.code());
             return response.body().string();
-        }catch (IOException e) {
+    
+        } catch (HttpResponseException e) {
+            // Propagar la excepción HttpResponseException
+            throw e;
+    
+        } catch (IOException e) {
             // Manejar excepciones de I/O, como problemas de red
-            throw new NetworkException("Error de red", e, e.getMessage());
+            String errorMessage = "Error de red: " + e.getMessage();
+            logger.error(errorMessage, e);
+            throw new NetworkException(errorMessage, e, e.getMessage());
+    
+        } finally {
+            // Cerrar la respuesta en cualquier caso
+            if (response != null) {
+                response.close();
+            }
         }
-
     }
+    
 
     public String post(String url,RequestBody requestBody) throws Exception {
 

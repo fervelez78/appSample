@@ -1,4 +1,4 @@
-package mx.bancosabadell.condusef.services;
+package mx.bancosabadell.condusef.models;
 
 import com.opencsv.bean.CsvBindByName;
 

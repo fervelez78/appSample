@@ -1,6 +1,7 @@
 package mx.bancosabadell.condusef.clients;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -14,10 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
+import mx.bancosabadell.condusef.models.Queja;
+import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.services.CondusefBussines;
 import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
-import mx.bancosabadell.condusef.services.QuejasData;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
@@ -53,72 +55,89 @@ public class ClientRedeco extends ClientConducef{
         return response;
     }
 
+    
     @Override
-    public ResponseRedeco postQuejas(){
-        ResponseRedeco responseRedeco = null;
-        logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO); 
+    public ResponseRedeco postQuejas() {
+        logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);
+    
+        // Se obtiene una lista de quejas cvs desde un documento cvs o txt
+        List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBen();
+    
+        // Se obtiene un ResponseRedeco con lista de quejas que se mapean desde la lista de quejas cvs
+        ResponseRedeco responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
         
-        
-        //Se obtine una lista de quejas desde un documento cvs o txt
-        List<QuejasData> listQuejasData  = condusefBussines.parseDocumentToBen();
-        
-        //! Agregar errores de validacion a una excepción personalizada o a errores del response TERMINADO
-        responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
+        List<Queja> quejas = new ArrayList<>();
 
-
-        String response;
-        System.out.println(responseRedeco.getErrorsValidate() == null);
+        // Verificar si hay errores de validación
         if (responseRedeco.getErrorsValidate() == null) {
+            try {
                 // Serializar a JSON usando Jackson
                 ObjectMapper objectMapper = new ObjectMapper();
-                String requestQuejaTojson = new String();
-
-                try {
-                    objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
-                    requestQuejaTojson = objectMapper.writeValueAsString(responseRedeco.getQuejas());
-
-                    
-                    logger.info("Request del cliente: " + requestQuejaTojson.toString());
-                } catch (JsonProcessingException e) {
-                    logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
-                }
-                
+                objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
+                String requestQuejaTojson = objectMapper.writeValueAsString(/* quejas */responseRedeco.getQuejas());
+    
+                logger.info("Request del cliente: " + requestQuejaTojson);
+    
+                // Crear el request que se mandará en la petición http
                 RequestBody requestBody = RequestBody.create(requestQuejaTojson, MediaType.parse("application/json; charset=utf-8"));
-                
-                
-                try {
-                    //!Es posible optener un estado 200 correcto, pero es posible que la peticion no sea sastisfactoria, integrar errores si existen, en la respuesta de salida con un estado fallido
-                    response = post(urlBase+pathRedeco, tokenAccess, requestBody);
-
-                    ObjectMapper objectMapperResponse = new ObjectMapper();
-                    responseRedeco = objectMapperResponse.readValue(response, ResponseRedeco.class);
-                    
-                    logger.info("Response redeco endpoin: " + ConfigConstants.URL_API_REDECO + " " + response);
-                } catch (HttpResponseException e) {
-                    //! agregar errores de exepciones al bean de respuesta
-                    // Manejar errores específicos de la respuesta HTTP
-                    response ="Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" +e.getResponseBody();
-                    logger.error("Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" +e.getResponseBody());
-                } catch (NetworkException e) {
-                    // Manejar errores de red
-                    response = "Error de red: " + e.getDetail() + " - " ;
-                    logger.error("Error de red: " + e.getDetail() +" - ");
-                } catch (Exception e) {
-                    // Manejar cualquier otro error
-                    response = "Error inesperado: " + e.getMessage();
-                    logger.error("Error inesperado: " + e.getMessage());
-                }
-                
-                logger.info("FIN CONSULTA REDECO");
-                return responseRedeco;
-        
-            }else{
-                return responseRedeco;
+    
+                // Realizar la petición HTTP
+                String response = post(urlBase + pathRedeco, tokenAccess, requestBody);
+    
+                // Parsear la respuesta a ResponseRedeco
+                ObjectMapper objectMapperResponse = new ObjectMapper();
+                responseRedeco = objectMapperResponse.readValue(response, ResponseRedeco.class);
+    
+                logger.info("Response redeco endpoint: " + ConfigConstants.URL_API_REDECO + " " + response);
+    
+            } catch (JsonProcessingException e) {
+                // Manejar errores de procesamiento JSON
+                handleJsonProcessingException(e, responseRedeco);
+    
+            } catch (HttpResponseException e) {
+                // Manejar errores específicos de la respuesta HTTP
+                handleHttpResponseException(e, responseRedeco);
+    
+            } catch (NetworkException e) {
+                // Manejar errores de red
+                handleNetworkException(e, responseRedeco);
+    
+            } catch (Exception e) {
+                // Manejar cualquier otro error
+                handleUnexpectedException(e, responseRedeco);
             }
-        
-
-        
+    
+            logger.info("FIN CONSULTA REDECO");
+        }
+    
+        return responseRedeco;
 
     }
 
+    private void handleJsonProcessingException(JsonProcessingException e, ResponseRedeco responseRedeco) {
+        logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
+        responseRedeco.getQuejas().clear();
+        responseRedeco.setError("Error de procesamiento JSON: " + e.getMessage());
+    }
+    
+    private void handleHttpResponseException(HttpResponseException e, ResponseRedeco responseRedeco) {
+        String errorMessage = "Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" + e.getResponseBody();
+        logger.error(errorMessage);
+        responseRedeco.getQuejas().clear();
+        responseRedeco.setError(errorMessage);
+    }
+    
+    private void handleNetworkException(NetworkException e, ResponseRedeco responseRedeco) {
+        String errorMessage = "Error de red: " + e.getDetail() + " - ";
+        logger.error(errorMessage);
+        responseRedeco.getQuejas().clear();
+        responseRedeco.setError(errorMessage);
+    }
+    
+    private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
+        String errorMessage = "Error inesperado: " + e.getMessage();
+        logger.error(errorMessage, e);
+        responseRedeco.getQuejas().clear();
+        responseRedeco.setError(errorMessage);
+    }
 }

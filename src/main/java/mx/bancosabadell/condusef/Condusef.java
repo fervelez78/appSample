@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import mx.bancosabadell.condusef.clients.ClientConducef;
 import mx.bancosabadell.condusef.clients.ClientRedeco;
-import mx.bancosabadell.condusef.models.ErrorInfoResponse;
+import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 
 public class Condusef{
@@ -20,7 +20,7 @@ public class Condusef{
        
         ResponseRedeco response = new ResponseRedeco();        
         response = redeco.postQuejas();
-        
+        System.out.println("Prueba : ---" + response);
         for ( ErrorInfoResponse string : response.getErrors()) {
             System.out.println(string.getQueja().getErrors() + " : "+string.getQueja().getQuejasFolio());
         }   

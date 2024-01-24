@@ -24,6 +24,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.models.InfoValidate;
 import mx.bancosabadell.condusef.models.Queja;
+import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 
 

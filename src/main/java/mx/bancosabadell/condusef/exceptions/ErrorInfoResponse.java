@@ -1,10 +1,11 @@
-package mx.bancosabadell.condusef.models;
+package mx.bancosabadell.condusef.exceptions;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+import mx.bancosabadell.condusef.models.QuejaInfoResponse;
 
 @Data
 public class ErrorInfoResponse {
