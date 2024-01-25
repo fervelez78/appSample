@@ -10,6 +10,7 @@ import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
+import mx.bancosabadell.condusef.models.ResponseRedecoService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -88,7 +89,7 @@ public abstract class ClientConducef {
     
 
     //Metodos http post via OkHttp para la comunicacion con conseft
-    public String post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
+    public ResponseRedecoService post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
         // Armar el request
         Request request = new Request.Builder()
                 .url(url)
@@ -98,20 +99,25 @@ public abstract class ClientConducef {
     
         Response response = null;
     
+        
         try {
             response = clientCondusef.newCall(request).execute();
-    
+            
+            ResponseRedecoService responseRedecoService = new ResponseRedecoService(response.body().string(), response.code(), response.message());
+            
             if (!response.isSuccessful()) {
                 
                  // Manejar excepciones con el servicio API Condusef
-                String responseBody = response.body().string(); // Almacenar el cuerpo en una variable
-                String errorMessage = response.code() + " Error en la respuesta HTTP: " + response.message() + " " + responseBody;
-                logger.error(errorMessage);
-                throw new HttpResponseException(response.code(), response.message(), responseBody);
-            }
+                 String responseBody = responseRedecoService.getBody(); // Almacenar el cuerpo en una variable
+                 String errorMessage = responseRedecoService.getCode() + " Error en la respuesta HTTP: " + responseRedecoService.getMessage() + " " + responseBody;
+                 
+                 logger.error(errorMessage);
+                 throw new HttpResponseException(responseRedecoService.getCode(), responseRedecoService.getMessage(), responseBody);
+                }
+                
     
             logger.info("Se termina el request con éxito " + response.code());
-            return response.body().string();
+            return responseRedecoService;
     
         } catch (HttpResponseException e) {
             // Propagar la excepción HttpResponseException

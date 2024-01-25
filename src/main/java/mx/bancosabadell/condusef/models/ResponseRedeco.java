@@ -9,7 +9,9 @@ public class ResponseRedeco {
     private List<String> addedRows;
     private List<ErrorInfoResponse> errors;
     private List<InfoValidate> errorsValidate;
-    private List<Queja> Quejas;
-    private String Error;
+    private List<Queja> quejas;
+    private String error;
+    private List<String> errores;
+    
 
 }

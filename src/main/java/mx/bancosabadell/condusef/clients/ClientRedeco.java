@@ -13,11 +13,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
+import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
 import mx.bancosabadell.condusef.models.Queja;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
+import mx.bancosabadell.condusef.models.ResponseRedecoService;
 import mx.bancosabadell.condusef.services.CondusefBussines;
 import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
 import okhttp3.MediaType;
@@ -76,19 +78,29 @@ public class ClientRedeco extends ClientConducef{
                 objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
                 String requestQuejaTojson = objectMapper.writeValueAsString(/* quejas */responseRedeco.getQuejas());
     
-                logger.info("Request del cliente: " + requestQuejaTojson);
+                //logger.info("Request del cliente: " + requestQuejaTojson);
     
                 // Crear el request que se mandará en la petición http
                 RequestBody requestBody = RequestBody.create(requestQuejaTojson, MediaType.parse("application/json; charset=utf-8"));
     
                 // Realizar la petición HTTP
-                String response = post(urlBase + pathRedeco, tokenAccess, requestBody);
-    
+                ResponseRedecoService response = post(urlBase + pathRedeco, tokenAccess, requestBody);
+                String responseToString = response.getBody();
                 // Parsear la respuesta a ResponseRedeco
                 ObjectMapper objectMapperResponse = new ObjectMapper();
-                responseRedeco = objectMapperResponse.readValue(response, ResponseRedeco.class);
+                responseRedeco = objectMapperResponse.readValue(responseToString, ResponseRedeco.class);
+                if (responseRedeco.getErrors().size() != 0) {
+                    List<String> listErrors = new ArrayList<>();
+                     for ( ErrorInfoResponse error : responseRedeco.getErrors()) {
+                            listErrors.add(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio());
+
+                            System.out.println(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio());
+                            logger.info(error.getQueja().getErrors() + " : "+ error.getQueja().getQuejasFolio());
+                        }
+                    
+                }
     
-                logger.info("Response redeco endpoint: " + ConfigConstants.URL_API_REDECO + " " + response);
+                logger.info("Respuesta redeco codigo estado " + response.getCode() + " - endpoint: " + ConfigConstants.URL_API_REDECO);
     
             } catch (JsonProcessingException e) {
                 // Manejar errores de procesamiento JSON
@@ -128,7 +140,7 @@ public class ClientRedeco extends ClientConducef{
     }
     
     private void handleNetworkException(NetworkException e, ResponseRedeco responseRedeco) {
-        String errorMessage = "Error de red: " + e.getDetail() + " - ";
+        String errorMessage = "Error de red: " + e.getDetail() + " - " + e.getMessage();
         logger.error(errorMessage);
         responseRedeco.getQuejas().clear();
         responseRedeco.setError(errorMessage);

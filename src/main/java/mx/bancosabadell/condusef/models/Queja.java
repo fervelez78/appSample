@@ -33,19 +33,23 @@ public class Queja {
     private String quejasFecRecepcion;
 
     @Positive(message = "medioId debe ser un número positivo")
+    @Digits(integer = 2, fraction = 0, message = "La longitud maxima de medioId debe ser de 2")
     private Integer medioId;
 
     @Positive(message = "nivelATId debe ser un número positivo")
+    @Digits(integer = 2, fraction = 0, message = "La longitud maxima de nivelATId debe ser de 2")
     private Integer nivelATId;
 
     @NotBlank(message = "product no puede estar vacío")
-    @Size( min=12, max = 12, message = "El numero de caracteres de product debe ser igual a 12")
+    @Size( min=12, max = 12, message = "El numero de caracteres de product debe ser de máximo 12")
     private String product;
 
     @NotBlank(message = "causasId no puede estar vacío")
+    @Size( min=1, max = 4, message = "El numero de caracteres de causasId debe ser de máximo 4 ")
     private String causasId;
 
     @NotBlank(message = "quejasPORI no puede estar vacío")
+    @Pattern(regexp = "^(SI|NO)$", message = "quejasPORI debe ser 'SI' o 'NO' (mayúsculas)")
     private String quejasPORI;
 
     @Min(value = 1, message = "quejasEstatus debe ser mayor o igual a 1")
@@ -53,18 +57,23 @@ public class Queja {
     private Integer quejasEstatus;
 
     @Min(value = 1, message = "estadosId debe ser mayor o igual a 1")
+    @Digits(integer = 2, fraction = 0, message = "La longitud maxima de estadosId debe ser de 2")
     private Integer estadosId;
 
     @Min(value = 1, message = "quejasMunId debe ser mayor o igual a 1")
+    @Digits(integer = 8, fraction = 0, message = "La longitud maxima de estadosId debe ser de 8")
     private Integer quejasMunId;
 
     @Min(value = 1, message = "quejasLocId debe ser mayor o igual a 1")
+    @Digits(integer = 8, fraction = 0, message = "La longitud maxima de quejasLocId debe ser de 8")
     private Integer quejasLocId;
 
     @Min(value = 1, message = "quejasColId debe ser mayor o igual a 1")
+    @Digits(integer = 8, fraction = 0, message = "La longitud maxima de quejasColId debe ser de 8")
     private Integer quejasColId;
 
     @Min(value = 1, message = "quejasCP debe ser mayor o igual a 1")
+    @Digits(integer = 10, fraction = 0, message = "La longitud maxima de quejasCP debe ser de 10")
     private Integer quejasCP;
 
     @Min(value = 1, message = "quejasTipoPersona debe ser mayor o igual a 1")
@@ -75,13 +84,11 @@ public class Queja {
     private String quejasSexo;
 
     @Min(value = 0, message = "quejasEdad debe ser mayor o igual a 0")
-    @Max(value = 999, message = "quejasEdad debe ser menor o igual a 999")
+    @Max(value = 150, message = "quejasEdad debe ser menor o igual a 150")
     private Integer quejasEdad;
 
-    @NotNull(message = "quejasFecResolucion no puede ser nulo")
     private String quejasFecResolucion;
 
-    @NotNull(message = "quejasFecNotificacion no puede ser nulo")
     private String quejasFecNotificacion;
 
     @Min(value = 1, message = "quejasRespuesta debe ser mayor o igual a 1")
@@ -89,6 +96,7 @@ public class Queja {
     private Integer quejasRespuesta;
 
     @Min(value = 0, message = "quejasNumPenal debe ser mayor o igual a 0")
+    @Digits(integer = 4, fraction = 0, message = "La longitud maxima de quejasNumPenal debe ser de 4")
     private Integer quejasNumPenal;
 
     

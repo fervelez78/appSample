@@ -20,10 +20,10 @@ public class Condusef{
        
         ResponseRedeco response = new ResponseRedeco();        
         response = redeco.postQuejas();
-        System.out.println("Prueba : ---" + response);
+        /* System.out.println("Prueba : ---" + response);
         for ( ErrorInfoResponse string : response.getErrors()) {
             System.out.println(string.getQueja().getErrors() + " : "+string.getQueja().getQuejasFolio());
-        }   
+        }    */
         logger.info("Fin prueba");
     }
 
