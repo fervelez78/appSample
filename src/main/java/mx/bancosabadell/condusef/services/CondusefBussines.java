@@ -3,9 +3,12 @@ package mx.bancosabadell.condusef.services;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -14,12 +17,16 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import javax.validation.Validator;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.models.InfoValidate;
@@ -132,7 +139,7 @@ public class CondusefBussines {
             queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
             queja.setQuejasFecResolucion(quejasData.getQuejasFecResolucion()); // Usar la fecha 
             queja.setQuejasFecNotificacion(quejasData.getQuejasFecNotificacion()); // Usar la fecha 
-            queja.setQuejasRespuesta(quejasData.getQuejasRespuesta()); // Nulo ya que está pendiente
+            queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
             queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
             queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
 
@@ -191,7 +198,7 @@ public class CondusefBussines {
 
         if (archivosEnDirectorio != null) {
             for (File archivo : archivosEnDirectorio) {
-                if (archivo.isFile() && archivo.getName().toLowerCase().endsWith(".txt")) {
+                if (archivo.isFile() && archivo.getName().toLowerCase().endsWith(".xlsx")) {
                     // Si se encuentra un archivo CSV, se intentara leerlo
                     try (FileReader reader = new FileReader(archivo)) {
                         CsvToBean<QuejasData> csvToBean = new CsvToBeanBuilder<QuejasData>(reader)
@@ -219,6 +226,69 @@ public class CondusefBussines {
 
     }
 
+    public List<QuejasData> parseDocumentToBenXlsx(){
+        File[] archivosEnDirectorio = findDocument();
+        List<QuejasData> quejasDataList = new ArrayList<>();
+    
+        if (archivosEnDirectorio != null) {
+            for (File archivo : archivosEnDirectorio) {
+                if (archivo.isFile() && archivo.getName().toLowerCase().endsWith(".xlsx")) {
+                    // Si se encuentra un archivo XLSX, se intentará leerlo
+                    try (FileInputStream fis = new FileInputStream(archivo);
+                         Workbook workbook = new XSSFWorkbook(fis)) {
+    
+                        Sheet sheet = workbook.getSheetAt(0);
+                        
+                        for (Row row : sheet) {
+                            // Ignorar la primera fila si contiene encabezados
+                            if (row.getRowNum() == 0) continue;
+    
+                            QuejasData quejasData = new QuejasData();
+                            
+                            //!Corregir Mapeo   Cannot get a NUMERIC value from a STRING cell y orden de datos 
+                            quejasData.setQuejasNoTrim(String.valueOf((int) row.getCell(2).getNumericCellValue()));
+                            quejasData.setQuejasNum(String.valueOf((int) row.getCell(3).getNumericCellValue()));
+                            quejasData.setQuejasFolio(row.getCell(4).getStringCellValue());
+                            quejasData.setQuejasFecRecepcion(formatDate(row.getCell(5).getDateCellValue()));
+                            quejasData.setMedioId(String.valueOf((int) row.getCell(6).getNumericCellValue()));
+                            quejasData.setNivelATId(String.valueOf((int) row.getCell(7).getNumericCellValue()));
+                            quejasData.setProduct(row.getCell(8).getStringCellValue());
+                            quejasData.setCausasId(row.getCell(9).getStringCellValue());
+                            quejasData.setQuejasPORI(row.getCell(10).getStringCellValue());
+                            quejasData.setEstadosId(String.valueOf((int) row.getCell(11).getNumericCellValue()));
+                            quejasData.setQuejasEstatus(String.valueOf((int) row.getCell(12).getNumericCellValue()));
+                            quejasData.setQuejasMunId(String.valueOf((int) row.getCell(13).getNumericCellValue()));
+                            quejasData.setQuejasLocId(String.valueOf((int) row.getCell(14).getNumericCellValue()));
+                            quejasData.setQuejasColId(String.valueOf((int) row.getCell(15).getNumericCellValue()));
+                            quejasData.setQuejasCP(String.valueOf((int) row.getCell(16).getNumericCellValue()));
+                            quejasData.setQuejasTipoPersona(String.valueOf((int) row.getCell(17).getNumericCellValue()));
+                            quejasData.setQuejasSexo(row.getCell(18).getStringCellValue());
+                            quejasData.setQuejasEdad(String.valueOf((int) row.getCell(19).getNumericCellValue()));
+                            quejasData.setQuejasFecResolucion(formatDate(row.getCell(20).getDateCellValue()));
+                            quejasData.setQuejasFecNotificacion(formatDate(row.getCell(21).getDateCellValue()));                            
+                            quejasData.setQuejasRespuesta(String.valueOf((int) row.getCell(22).getNumericCellValue()));
+                            quejasData.setQuejasNumPenal(String.valueOf((int) row.getCell(23).getNumericCellValue()));
+                            quejasData.setPenalizacionId(String.valueOf((int) row.getCell(24).getNumericCellValue()));
+
+
+
+                            // Agrega más campos según tus necesidades
+    
+                            quejasDataList.add(quejasData);
+                        }
+    
+                    } catch (IOException | EncryptedDocumentException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            System.err.println("No se pudieron listar los archivos en el directorio.");
+            return null;
+        }
+        return quejasDataList;
+    }
+
     public File[] findDocument(){
         //!Mejorar captura de exepciones
         // Verifica si el directorio existe
@@ -233,6 +303,11 @@ public class CondusefBussines {
         return archivosEnDirectorio;
     }
 
+    public String formatDate (Date fecha){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String fechaFormateada = dateFormat.format(fecha);
+        return fechaFormateada;
+    }
         
         
 }

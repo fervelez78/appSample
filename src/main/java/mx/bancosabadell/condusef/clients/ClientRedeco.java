@@ -63,7 +63,7 @@ public class ClientRedeco extends ClientConducef{
         logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);
     
         // Se obtiene una lista de quejas cvs desde un documento cvs o txt
-        List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBen();
+        List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBenXlsx();
     
         // Se obtiene un ResponseRedeco con lista de quejas que se mapean desde la lista de quejas cvs
         ResponseRedeco responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
