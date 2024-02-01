@@ -175,7 +175,7 @@ public class CondusefBussines {
 
                 responseRedeco.setQuejas(quejaList);
                 responseRedeco.getQuejas().add(queja);
-               loggerRedeco.info(queja.getQuejasFolio() + " Ok"); 
+               loggerRedeco.info("La carga de la queja con folio " + queja.getQuejasFolio() + "fue correcta"); 
                               
            }
        } catch (Exception e) {
@@ -219,7 +219,7 @@ public class CondusefBussines {
                 }
             }
         } else {
-            System.err.println("No se pudieron listar los archivos en el directorio.");
+            loggerRedeco.info("No se pudieron listar los archivos en el directorio.");
             return null;
         }
         return quejasDataList;
@@ -272,11 +272,11 @@ public class CondusefBussines {
 
 
 
-                            // Agrega más campos según tus necesidades
+                            
     
                             quejasDataList.add(quejasData);
                         }
-    
+                        
                     } catch (IOException | EncryptedDocumentException e) {
                         e.printStackTrace();
                     }
@@ -289,18 +289,47 @@ public class CondusefBussines {
         return quejasDataList;
     }
 
-    public File[] findDocument(){
-        //!Mejorar captura de exepciones
-        // Verifica si el directorio existe
-        File directorioCsv = new File(urlNas+pathRedeco);
+    public File[] findDocument() {
+        // Directorio donde se copian los archivos
+        File directorioCsv = new File(urlNas + pathRedeco);
+
         if (!directorioCsv.isDirectory()) {
-            System.err.println("La ruta especificada no es un directorio válido. " + urlNas+pathRedeco );
+            loggerRedeco.info("La ruta especificada no es un directorio válido. " + urlNas + pathRedeco);
             return null;
         }
 
-        // Lista de archivos en el directorio
-        File[] archivosEnDirectorio = directorioCsv.listFiles();
-        return archivosEnDirectorio;
+        // Nombre del archivo 
+        String nombreArchivoEsperado = "REPORTE REDECO.xlsx";
+
+        // Ruta completa del archivo que estás esperando
+        File archivoEsperado = new File(directorioCsv, nombreArchivoEsperado);
+
+        long previousSize = 0;
+
+        while (true) {
+            long currentSize = archivoEsperado.length();
+
+            if (currentSize == previousSize) {
+                // El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado
+                loggerRedeco.info("La copia de " + nombreArchivoEsperado + " ha finalizado.");
+                break;  // Salir del bucle
+            }
+
+            // Esperar 1 segundo antes de volver a verificar
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                // Manejar interrupciones si es necesario
+            }
+
+            previousSize = currentSize;
+        }
+        File[] archivoEnDirectorio = new File[1];
+        archivoEnDirectorio[0] = archivoEsperado;
+
+        // En este punto, el archivo ha sido completamente copiado
+        return archivoEnDirectorio;
     }
 
     public String formatDate (Date fecha){

@@ -13,6 +13,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 
+
 import lombok.Data;
 
 @Data
@@ -52,8 +53,7 @@ public class Queja {
     @Pattern(regexp = "^(SI|NO)$", message = "quejasPORI debe ser 'SI' o 'NO' (mayúsculas)")
     private String quejasPORI;
 
-    @Min(value = 1, message = "quejasEstatus debe ser mayor o igual a 1")
-    @Max(value = 2, message = "quejasEstatus debe ser menor o igual a 2")
+    
     private Integer quejasEstatus;
 
     @Min(value = 1, message = "estadosId debe ser mayor o igual a 1")
@@ -80,7 +80,8 @@ public class Queja {
     @Max(value = 2, message = "quejasTipoPersona debe ser menor o igual a 2")
     private Integer quejasTipoPersona;
 
-    @Pattern(regexp = "[HM]", message = "quejasSexo debe ser 'H' o 'M'")
+    
+    @Pattern(regexp = "[HM]|", message = "quejasSexo debe ser 'H' o 'M'")
     private String quejasSexo;
 
     @Min(value = 0, message = "quejasEdad debe ser mayor o igual a 0")
@@ -91,6 +92,7 @@ public class Queja {
 
     private String quejasFecNotificacion;
 
+    
     @Min(value = 1, message = "quejasRespuesta debe ser mayor o igual a 1")
     @Max(value = 3, message = "quejasRespuesta debe ser menor o igual a 3")
     private Integer quejasRespuesta;
@@ -100,9 +102,9 @@ public class Queja {
     private Integer quejasNumPenal;
 
     
-    @Min(value = 1, message = "penalizacionId debe ser mayor o igual a 1")
-    @Max(value = 3, message = "penalizacionId debe ser menor o igual a 3")
-    private Integer penalizacionId;
+   
+    
+    private int penalizacionId;
 
     public Queja(
             Integer quejasNoTrim, Integer quejasNum, String quejasFolio, String quejasFecRecepcion, Integer medioId,

@@ -29,12 +29,10 @@ public class Condusef{
                 // Caso: error de validación
                 System.out.println("No se obtuvieron errores de validacion");
 
+                System.out.println(response);
                 
-                // Caso: errores de validación detallados
-                for (InfoValidate string : response.getErrorsValidate()) {
-                    System.out.println(string.getMessageError());
-                }
             } else {
+                // Caso: errores de validación detallados
                 System.out.println("Se obtuvieron errores de validacion");
                 for (InfoValidate string : response.getErrorsValidate()) {
                     System.out.println(string.getMessageError());
