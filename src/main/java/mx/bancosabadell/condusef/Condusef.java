@@ -28,8 +28,6 @@ public class Condusef{
             if (response.getErrorsValidate() == null) {
                 // Caso: error de validación
                 System.out.println("No se obtuvieron errores de validacion");
-
-                System.out.println(response);
                 
             } else {
                 // Caso: errores de validación detallados
@@ -37,7 +35,15 @@ public class Condusef{
                 for (InfoValidate string : response.getErrorsValidate()) {
                     System.out.println(string.getMessageError());
                 }
-            }            
+            }  
+            
+            if (response.getError() == null) {
+                System.out.println("No se obtuvieron errores HTTP");
+            }else{
+                System.out.println("Se obtuvieron errores HTTP");
+              
+                    System.out.println(response.getError());
+                }
         } else {
             // Caso: errores generales
             for (ErrorInfoResponse string : response.getErrors()) {
