@@ -4,8 +4,6 @@ package mx.bancosabadell.condusef.clients;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,6 @@ public class ClientRedeco extends ClientConducef{
 
     //Logica de negocio
     private CondusefBussines condusefBussines = new CondusefBussines();
-
     
     @Override
     public String getQuejas() {
@@ -66,12 +63,14 @@ public class ClientRedeco extends ClientConducef{
         List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBenXlsx();
     
         // Se obtiene un ResponseRedeco con lista de quejas que se mapean desde la lista de quejas cvs
+        
         ResponseRedeco responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
         
         List<Queja> quejas = new ArrayList<>();
 
+       
         // Verificar si hay errores de validación
-        if (responseRedeco.getErrorsValidate() == null) {
+        if (responseRedeco.getErrorsValidate() == null && responseRedeco.getError() == null) {
             try {
                 // Serializar a JSON usando Jackson
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -94,7 +93,7 @@ public class ClientRedeco extends ClientConducef{
                      for ( ErrorInfoResponse error : responseRedeco.getErrors()) {
                             listErrors.add(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio());
 
-                            System.out.println(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio());
+                          /*   System.out.println(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio()); */
                             logger.info(error.getQueja().getErrors() + " : "+ error.getQueja().getQuejasFolio());
                         }
                     
@@ -147,9 +146,10 @@ public class ClientRedeco extends ClientConducef{
     }
     
     private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
-        String errorMessage = "Error inesperado: " + e.getMessage();
+        String errorMessage = "Error inesperado: " + e;
         logger.error(errorMessage, e);
         responseRedeco.getQuejas().clear();
         responseRedeco.setError(errorMessage);
     }
+    
 }

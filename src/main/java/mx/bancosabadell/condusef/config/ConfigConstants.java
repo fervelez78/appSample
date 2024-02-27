@@ -11,6 +11,7 @@ public class ConfigConstants {
     public static String DIR_NAS_REDECO;
     public static String DIR_NAS_REUNE;
     public static String DIR_NAS_HISTORICO;
+    public static String DIR_NAS_TIKETS;
 
     
     public static String CORREO_NOTIF_REDECO;
@@ -42,6 +43,7 @@ public class ConfigConstants {
         DIR_NAS_REDECO = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_redeco");
         DIR_NAS_REUNE = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_reune");
         DIR_NAS_HISTORICO = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_historico");
+        DIR_NAS_TIKETS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_tiket");
 
         CORREO_NOTIF_REDECO = prop.getProperty("mx.bancosabadel.conducef.email_notif_redeco");
         URL_SERV_EMAIL = prop.getProperty("mx.bancosabadel.latinia.url.base");

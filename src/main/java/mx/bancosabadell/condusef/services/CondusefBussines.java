@@ -116,37 +116,51 @@ public class CondusefBussines {
         List<InfoValidate> listInfoValidate = new ArrayList<>();
         List<Queja> quejaList = new ArrayList<>();
         
-        for (QuejasData quejasData : quejasDataList) {            
-            Queja queja = new Queja();
+        
+        try {
+            for (QuejasData quejasData : quejasDataList) {            
+                Queja queja = new Queja();
 
-            queja.setQuejasNoTrim(Integer.parseInt(quejasData.getQuejasNoTrim())); // Mayo
-            queja.setQuejasNum(Integer.parseInt(quejasData.getQuejasNum()));
-            queja.setQuejasFolio(quejasData.getQuejasFolio());
-            queja.setQuejasFecRecepcion(quejasData.getQuejasFecRecepcion()); // Usar la fecha
-            queja.setMedioId(Integer.parseInt(quejasData.getMedioId()));
-            queja.setNivelATId(Integer.parseInt(quejasData.getNivelATId()));
-            queja.setProduct(quejasData.getProduct());
-            queja.setCausasId(quejasData.getCausasId());
-            queja.setQuejasPORI(quejasData.getQuejasPORI());
-            queja.setQuejasEstatus(Integer.parseInt(quejasData.getQuejasEstatus())); // Pendiente
-            queja.setEstadosId(Integer.parseInt(quejasData.getEstadosId())); // Ejemplo de entidad federativa
-            queja.setQuejasMunId(Integer.parseInt(quejasData.getQuejasMunId()));
-            queja.setQuejasLocId(Integer.parseInt(quejasData.getQuejasLocId()));
-            queja.setQuejasColId(Integer.parseInt(quejasData.getQuejasColId()));
-            queja.setQuejasCP(Integer.parseInt(quejasData.getQuejasCP()));
-            queja.setQuejasTipoPersona(Integer.parseInt(quejasData.getQuejasTipoPersona())); // Persona Física
-            queja.setQuejasSexo(quejasData.getQuejasSexo());
-            queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
-            queja.setQuejasFecResolucion(quejasData.getQuejasFecResolucion()); // Usar la fecha 
-            queja.setQuejasFecNotificacion(quejasData.getQuejasFecNotificacion()); // Usar la fecha 
-            queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
-            queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
-            queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
+                queja.setQuejasNoTrim(Integer.parseInt(quejasData.getQuejasNoTrim())); // Mayo
+                queja.setQuejasNum(Integer.parseInt(quejasData.getQuejasNum()));
+                queja.setQuejasFolio(quejasData.getQuejasFolio());
+                queja.setQuejasFecRecepcion(quejasData.getQuejasFecRecepcion()); // Usar la fecha
+                queja.setMedioId(Integer.parseInt(quejasData.getMedioId()));
+                queja.setNivelATId(Integer.parseInt(quejasData.getNivelATId()));
+                queja.setProduct(quejasData.getProduct());
+                queja.setCausasId(quejasData.getCausasId());
+                queja.setQuejasPORI(quejasData.getQuejasPORI());
+                queja.setQuejasEstatus(Integer.parseInt(quejasData.getQuejasEstatus())); // Pendiente
+                queja.setEstadosId(Integer.parseInt(quejasData.getEstadosId())); // Ejemplo de entidad federativa
+                queja.setQuejasMunId(Integer.parseInt(quejasData.getQuejasMunId()));
+                queja.setQuejasLocId(Integer.parseInt(quejasData.getQuejasLocId()));
+                queja.setQuejasColId(Integer.parseInt(quejasData.getQuejasColId()));
+                queja.setQuejasCP(Integer.parseInt(quejasData.getQuejasCP()));
+                queja.setQuejasTipoPersona(Integer.parseInt(quejasData.getQuejasTipoPersona())); // Persona Física
+                queja.setQuejasSexo(quejasData.getQuejasSexo());
+                queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
+                queja.setQuejasFecResolucion(quejasData.getQuejasFecResolucion()); // Usar la fecha 
+                queja.setQuejasFecNotificacion(quejasData.getQuejasFecNotificacion()); // Usar la fecha 
+                queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
+                queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
+                queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
 
-            responseRedeco = validateQueja(queja, responseRedeco, listInfoValidate, quejaList);  
-            
+                responseRedeco = validateQueja(queja, responseRedeco, listInfoValidate, quejaList);  
+                
+            }
+        } catch (Exception e) {
+            handleUnexpectedException(e, responseRedeco);
+            System.out.println(e);
         }
         return responseRedeco;
+    }
+
+    private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
+        String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE REDECO.xlsx";
+        loggerRedeco.error(errorMessage);
+        List<Queja> quejas = new ArrayList<>();
+        responseRedeco.setQuejas(quejas);
+        responseRedeco.setError(errorMessage);
     }
 
     public ResponseRedeco validateQueja(Queja queja, ResponseRedeco responseRedeco,  List<InfoValidate> listInfoValidate, List<Queja> quejaList){
@@ -299,7 +313,7 @@ public class CondusefBussines {
         }
 
         // Nombre del archivo 
-        String nombreArchivoEsperado = "REPORTE REDECO.xlsx";
+        String nombreArchivoEsperado = "REPORTE REDECO.xlsx"; //!Nombre de archivo configurar en properties
 
         // Ruta completa del archivo que estás esperando
         File archivoEsperado = new File(directorioCsv, nombreArchivoEsperado);
@@ -311,7 +325,7 @@ public class CondusefBussines {
 
             if (currentSize == previousSize) {
                 // El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado
-                loggerRedeco.info("La copia de " + nombreArchivoEsperado + " ha finalizado.");
+                loggerRedeco.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
                 break;  // Salir del bucle
             }
 
@@ -325,11 +339,14 @@ public class CondusefBussines {
 
             previousSize = currentSize;
         }
-        File[] archivoEnDirectorio = new File[1];
-        archivoEnDirectorio[0] = archivoEsperado;
+        
+        if (archivoEsperado.exists()) {
+            return new File[] { archivoEsperado };
+        }else{
+            loggerRedeco.info("El archivo esperado " + nombreArchivoEsperado + " no fue encontrado.");
+            return null;
+        }
 
-        // En este punto, el archivo ha sido completamente copiado
-        return archivoEnDirectorio;
     }
 
     public String formatDate (Date fecha){
