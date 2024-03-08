@@ -1,7 +1,7 @@
 package mx.bancosabadell.condusef.config;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class ConfigConstants {
@@ -27,12 +27,15 @@ public class ConfigConstants {
 
     public static String HEADER_AUTH = "Authorization";
 
+    public static String REG_EXP_QUEJAS_REDECO;
 
     static {
         Properties prop = new Properties();
 
         /* InputStream input = new FileInputStream(URL_CONFIG_FILE) */                  
-        try (   InputStream input = ConfigConstants.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try {
+        	// InputStream input = ConfigConstants.class.getClassLoader().getResourceAsStream("C:\\Indra\\rep_condusef\\bin\\config.properties")) {
+        	FileInputStream input = new FileInputStream("config.properties");
             prop.load(input);
         } catch(IOException ex){
             throw new IllegalStateException("Error al cargar el archivo de configuración", ex);
@@ -52,6 +55,7 @@ public class ConfigConstants {
         URL_API_REUNE = prop.getProperty("mx.bancosabadel.conducef.url.api_reune.path");
         URL_API_REDECO = prop.getProperty("mx.bancosabadel.conducef.url.api_redeco.path");
         TOKEN_CONDUSEF = prop.getProperty("mx.bancosabadel.conducef.token");
+        REG_EXP_QUEJAS_REDECO = prop.getProperty("mx.bancosabadel.conducef.file.reg_exp_quejas_redeco");
         
     }
 }

@@ -9,10 +9,11 @@ import mx.bancosabadell.condusef.models.QuejaInfoResponse;
 
 @Data
 public class ErrorInfoResponse {
-    @JsonProperty("queja")
+    
+	@JsonProperty("queja")
     private QuejaInfoResponse queja;
-    @JsonProperty("errors")
+    
+	@JsonProperty("errors")
     private List<String> errors;
-
     
 }

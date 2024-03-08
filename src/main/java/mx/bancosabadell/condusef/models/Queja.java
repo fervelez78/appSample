@@ -19,10 +19,8 @@ import lombok.Data;
 @Data
 public class Queja {
 
-    
     @Max(value = 12, message = "QuejasNoTrim debe ser menor o igual a 12")
     private Integer quejasNoTrim;
-
     
     @Digits(integer = 1, fraction = 0, message = "La longitud maxima de QuejasNum debe ser de 1")
     private Integer quejasNum;
@@ -53,7 +51,6 @@ public class Queja {
     @Pattern(regexp = "^(SI|NO)$", message = "quejasPORI debe ser 'SI' o 'NO' (mayúsculas)")
     private String quejasPORI;
 
-    
     private Integer quejasEstatus;
 
     @Min(value = 1, message = "estadosId debe ser mayor o igual a 1")
@@ -80,7 +77,6 @@ public class Queja {
     @Max(value = 2, message = "quejasTipoPersona debe ser menor o igual a 2")
     private Integer quejasTipoPersona;
 
-    
     @Pattern(regexp = "[HM]|", message = "quejasSexo debe ser 'H' o 'M'")
     private String quejasSexo;
 
@@ -92,7 +88,6 @@ public class Queja {
 
     private String quejasFecNotificacion;
 
-    
     @Min(value = 1, message = "quejasRespuesta debe ser mayor o igual a 1")
     @Max(value = 3, message = "quejasRespuesta debe ser menor o igual a 3")
     private Integer quejasRespuesta;
@@ -100,9 +95,6 @@ public class Queja {
     @Min(value = 0, message = "quejasNumPenal debe ser mayor o igual a 0")
     @Digits(integer = 4, fraction = 0, message = "La longitud maxima de quejasNumPenal debe ser de 4")
     private Integer quejasNumPenal;
-
-    
-   
     
     private int penalizacionId;
 
@@ -146,10 +138,8 @@ public class Queja {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             return sdf.parse(fecha);
         } catch (ParseException e) {
-            throw new IllegalArgumentException("Formato de fecha inválido: " + fecha);
+        	throw new IllegalArgumentException("Formato de fecha inválido: " + fecha);
         }
     }
     
-    
-
 }

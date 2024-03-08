@@ -10,7 +10,10 @@ public class ResponseRedecoService {
         this.code = code;
         this.message = message;
     }
+
     private String body;
+    
     private Integer code;
+    
     private String message;
 }

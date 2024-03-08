@@ -1,8 +1,13 @@
 package mx.bancosabadell.condusef.exceptions;
 
 public class NetworkException extends Exception {
-
-    private String detail;
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6707198788234313388L;
+	
+	private String detail;
 
 
     public NetworkException(String message) {

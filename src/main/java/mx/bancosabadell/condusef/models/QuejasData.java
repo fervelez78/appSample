@@ -3,6 +3,7 @@ package mx.bancosabadell.condusef.models;
 import com.opencsv.bean.CsvBindByName;
 
 import lombok.Data;
+
 @Data
 public class QuejasData {
 
@@ -80,4 +81,5 @@ public class QuejasData {
 
     @CsvBindByName(column = " Tipo de penalización")
     private String penalizacionId;
+
 }

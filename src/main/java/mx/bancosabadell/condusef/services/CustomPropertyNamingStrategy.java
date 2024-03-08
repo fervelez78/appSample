@@ -9,7 +9,12 @@ public class CustomPropertyNamingStrategy extends PropertyNamingStrategy {
 
     //Clase personalizada para definirl la forma que se serializa a json
 
-    @Override
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
     public String nameForField(MapperConfig<?> config, AnnotatedField field, String defaultName) {
         return customName(defaultName);
     }

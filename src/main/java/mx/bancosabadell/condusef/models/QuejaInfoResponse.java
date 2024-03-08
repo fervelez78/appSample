@@ -5,10 +5,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+
 @Data
 public class QuejaInfoResponse {
 
-     @JsonProperty("QuejasNoTrim")
+    @JsonProperty("QuejasNoTrim")
     private int quejasNoTrim;
 
     @JsonProperty("QuejasNum")
@@ -78,4 +79,5 @@ public class QuejaInfoResponse {
     private int penalizacionId;
 
     private List<String> errors;
+
 }

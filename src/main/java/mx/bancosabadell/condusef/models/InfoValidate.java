@@ -10,14 +10,5 @@ public class InfoValidate {
     public InfoValidate( String messageError) {
         this.messageError = messageError;
     }
-   
-
-    
-
-    
- 
-    
-    
-
 
 }

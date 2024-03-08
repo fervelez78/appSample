@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
-import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.models.ResponseRedecoService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,10 +25,6 @@ public abstract class ClientConducef {
 
     protected String pathReune = ConfigConstants.URL_API_REUNE;
     
-    public abstract String getQuejas();
-
-    public abstract ResponseRedeco postQuejas();
-
     private final OkHttpClient clientCondusef;
 
     public ClientConducef(){
@@ -55,7 +50,8 @@ public abstract class ClientConducef {
             logger.info("Se termina el request con exito " + response.code());
             return response.body().string();            
         }catch (IOException e) {
-            // Manejar excepciones de I/O, como problemas de red
+        	logger.error("Error de red", e, e.getMessage());
+        	// Manejar excepciones de I/O, como problemas de red
             throw new NetworkException("Error de red", e, e.getMessage());
         }
 
@@ -80,7 +76,8 @@ public abstract class ClientConducef {
             logger.info("Se termina el request con exito " + response.code());
             return response.body().string();            
         }catch (IOException e) {
-    // Manejar excepciones de I/O, como problemas de red
+        	// Manejar excepciones de I/O, como problemas de red
+        	logger.error("Error de red", e, e.getMessage());
             throw new NetworkException("Error de red", e, e.getMessage());
         }
 
@@ -90,7 +87,11 @@ public abstract class ClientConducef {
 
     //Metodos http post via OkHttp para la comunicacion con conseft
     public ResponseRedecoService post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
-        // Armar el request
+        //
+    	logger.info("url: " + url);
+    	logger.info("token: " + token);
+
+    	// Armar el request
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
@@ -121,6 +122,7 @@ public abstract class ClientConducef {
     
         } catch (HttpResponseException e) {
             // Propagar la excepción HttpResponseException
+        	logger.error("Error response", e, e.getMessage());
             throw e;
     
         } catch (IOException e) {
@@ -156,7 +158,7 @@ public abstract class ClientConducef {
             return response.body().string();
         }catch (IOException e) {
             // Manejar excepciones de I/O, como problemas de red
-            
+        	logger.error("Error de red", e, e.getMessage());
             throw new NetworkException("Error de red", e, e.getMessage());
         }
 

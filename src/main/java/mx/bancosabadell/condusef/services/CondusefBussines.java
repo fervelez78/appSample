@@ -1,11 +1,14 @@
 package mx.bancosabadell.condusef.services;
 
-
-
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,28 +30,26 @@ import org.slf4j.LoggerFactory;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
-
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.models.InfoValidate;
 import mx.bancosabadell.condusef.models.Queja;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 
-
 public class CondusefBussines {
-
-
-
     
     private static final Logger loggerRedeco = LoggerFactory.getLogger("clientRedecoLogger");
     
     public String urlNas = ConfigConstants.DIR_NAS;
+
     public String pathRedeco = ConfigConstants.DIR_NAS_REDECO;
+    
     public String urlNasLog = ConfigConstants.DIR_NAS_LOGS;
+    
     public String urlHistorico = ConfigConstants.DIR_NAS_HISTORICO;
 
-
-   /*  public Queja mapperDocumentQuejaDummi(String folio){
+    /*
+    public Queja mapperDocumentQuejaDummi(String folio){
         
         loggerRedeco.info("Inicio: Se convierte el documento a queja");
         parseDocumentToBen();
@@ -81,46 +82,43 @@ public class CondusefBussines {
 
         Queja queja = null;
           
-
-            queja = new Queja(
-                quejasNoTrim,
-                quejasNum,
-                quejasFolio,
-                quejasFecRecepcion,
-                medioId,
-                nivelATId,
-                product,
-                causasId,
-                quejasPORI,
-                quejasEstatus,
-                estadosId,
-                quejasMunId,
-                quejasLocId,
-                quejasColId,
-                quejasCP,
-                quejasTipoPersona,
-                quejasSexo,
-                quejasEdad,
-                quejasFecResolucion,
-                quejasFecNotificacion,
-                quejasRespuesta,
-                quejasNumPenal,
-                penalizacionId
-                );
+        queja = new Queja(
+            quejasNoTrim,
+            quejasNum,
+            quejasFolio,
+            quejasFecRecepcion,
+            medioId,
+            nivelATId,
+            product,
+            causasId,
+            quejasPORI,
+            quejasEstatus,
+            estadosId,
+            quejasMunId,
+            quejasLocId,
+            quejasColId,
+            quejasCP,
+            quejasTipoPersona,
+            quejasSexo,
+            quejasEdad,
+            quejasFecResolucion,
+            quejasFecNotificacion,
+            quejasRespuesta,
+            quejasNumPenal,
+            penalizacionId
+        );
         return validateQueja(queja);        
     } */
-    
-    
+        
     public ResponseRedeco mapperDocumentQueja(List<QuejasData> quejasDataList){
-        ResponseRedeco responseRedeco = new ResponseRedeco();
+        
+    	ResponseRedeco responseRedeco = new ResponseRedeco();
         List<InfoValidate> listInfoValidate = new ArrayList<>();
         List<Queja> quejaList = new ArrayList<>();
-        
         
         try {
             for (QuejasData quejasData : quejasDataList) {            
                 Queja queja = new Queja();
-
                 queja.setQuejasNoTrim(Integer.parseInt(quejasData.getQuejasNoTrim())); // Mayo
                 queja.setQuejasNum(Integer.parseInt(quejasData.getQuejasNum()));
                 queja.setQuejasFolio(quejasData.getQuejasFolio());
@@ -144,13 +142,12 @@ public class CondusefBussines {
                 queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
                 queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
                 queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
-
+                loggerRedeco.info("Enviando queja " + queja.getQuejasFolio());
                 responseRedeco = validateQueja(queja, responseRedeco, listInfoValidate, quejaList);  
-                
             }
         } catch (Exception e) {
+            loggerRedeco.error("Error: " + e.getMessage());
             handleUnexpectedException(e, responseRedeco);
-            System.out.println(e);
         }
         return responseRedeco;
     }
@@ -171,10 +168,9 @@ public class CondusefBussines {
                .messageInterpolator(new ParameterMessageInterpolator())
                .buildValidatorFactory();
 
-               Validator validator = validatorFactory.getValidator();
+           Validator validator = validatorFactory.getValidator();
 
-               Set<ConstraintViolation<Queja>> violations = validator.validate(queja);
-
+           Set<ConstraintViolation<Queja>> violations = validator.validate(queja);
                
            if (!violations.isEmpty()) {
                for (ConstraintViolation<Queja> violation : violations) {                
@@ -186,7 +182,6 @@ public class CondusefBussines {
                    loggerRedeco.info(errorinfoValidate.getMessageError());
                }   
            } else {
-
                 responseRedeco.setQuejas(quejaList);
                 responseRedeco.getQuejas().add(queja);
                loggerRedeco.info("La carga de la queja con folio " + queja.getQuejasFolio() + "fue correcta"); 
@@ -203,10 +198,10 @@ public class CondusefBussines {
        return responseRedeco;
     }
     
-    public List<QuejasData> parseDocumentToBen(){
+    public List<QuejasData> parseDocumentToBen() throws Exception{
         //!Mejorar captura de exepciones
         //Se buscan los archivos .txt desde la carpeta dada el cual regresa una lista de archivos
-        File[] archivosEnDirectorio = findDocument();
+    	List<File> archivosEnDirectorio = findDocument();
 
         List<QuejasData> quejasDataList = new ArrayList<>();
 
@@ -215,7 +210,8 @@ public class CondusefBussines {
                 if (archivo.isFile() && archivo.getName().toLowerCase().endsWith(".xlsx")) {
                     // Si se encuentra un archivo CSV, se intentara leerlo
                     try (FileReader reader = new FileReader(archivo)) {
-                        CsvToBean<QuejasData> csvToBean = new CsvToBeanBuilder<QuejasData>(reader)
+                        loggerRedeco.info("Leyendo archivo " + archivo.getName());
+                    	CsvToBean<QuejasData> csvToBean = new CsvToBeanBuilder<QuejasData>(reader)
                                 .withType(QuejasData.class)
                                 .withSeparator(',')
                                 .build();
@@ -228,20 +224,24 @@ public class CondusefBussines {
                         } */
                         
                     } catch (IOException e) {
+                    	loggerRedeco.error("Error: " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
             }
         } else {
-            loggerRedeco.info("No se pudieron listar los archivos en el directorio.");
-            return null;
+        	String error = "Error: No se pudieron listar los archivos en el directorio.";
+            loggerRedeco.info(error);
+            throw new Exception(error);
         }
         return quejasDataList;
 
     }
 
-    public List<QuejasData> parseDocumentToBenXlsx(){
-        File[] archivosEnDirectorio = findDocument();
+    public List<QuejasData> parseDocumentToBenXlsx() throws Exception {
+    	
+    	List<File> archivosEnDirectorio = findDocument();
+        
         List<QuejasData> quejasDataList = new ArrayList<>();
     
         if (archivosEnDirectorio != null) {
@@ -284,67 +284,111 @@ public class CondusefBussines {
                             quejasData.setQuejasNumPenal(String.valueOf((int) row.getCell(23).getNumericCellValue()));
                             quejasData.setPenalizacionId(String.valueOf((int) row.getCell(24).getNumericCellValue()));
 
-
-
-                            
-    
                             quejasDataList.add(quejasData);
                         }
-                        
+                        // cerrando el archivo
+                        loggerRedeco.info("Cerrando el archivo " + archivo.getPath() + " -> " + urlNas + pathRedeco + urlHistorico + archivo.getName());
+                        try {
+                        	workbook.close();
+                        	fis.close();
+                        }catch(Exception e) {
+                        	loggerRedeco.info(e.getMessage());
+                        }
+                        // Movemos el archivo al histórico
+                        loggerRedeco.info("Copiando archivo " + archivo.getPath());
+                        Path origenPath = FileSystems.getDefault().getPath(archivo.getPath());
+                        Path destinoPath = FileSystems.getDefault().getPath(urlNas + pathRedeco + urlHistorico + archivo.getName());
+                        // Crear la carpeta historico si no existe
+                        File historico = new File(urlNas + pathRedeco + urlHistorico);
+                        if (!historico.exists()) {
+                        	loggerRedeco.info("Creando direcotrio " + historico.getPath());
+                        	historico.mkdir();
+                        }
+                        // Movemos el archivo a la carpeta de histórico
+                        try {
+                            Files.move(origenPath, destinoPath, StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            loggerRedeco.info(e.getMessage());
+                        }
                     } catch (IOException | EncryptedDocumentException e) {
-                        e.printStackTrace();
+                    	loggerRedeco.error("Error: " + e.getMessage());
+                    	e.printStackTrace();
                     }
                 }
             }
         } else {
-            System.err.println("No se pudieron listar los archivos en el directorio.");
+            loggerRedeco.error("No se pudieron listar los archivos en el directorio.");
             return null;
         }
         return quejasDataList;
     }
 
-    public File[] findDocument() {
+    // Creamos nuestro filtro de archivos o ficheros
+    FileFilter archivosFilter = new FileFilter() {
+        //Sobreescribimos el método
+        public boolean accept(File file) {
+            // Nombre del archivo los nombres aceptados son: 
+            // REDECO_QUEJAS.xlsx, REDECO_QUEJAS_[YYYYMMDD].xlsx, REDECO_QUEJAS_[YYYYMMDDHHMM].xlsx
+            String nombreArchivoEsperado = ConfigConstants.REG_EXP_QUEJAS_REDECO; 
+            loggerRedeco.info("Expresion regular redeco quejas: " + nombreArchivoEsperado);
+
+        	if (file.getName().matches(nombreArchivoEsperado)) {
+                return true;
+            }
+            return false;
+        }
+    };
+    
+    public List<File> findDocument() throws Exception{
         // Directorio donde se copian los archivos
         File directorioCsv = new File(urlNas + pathRedeco);
 
         if (!directorioCsv.isDirectory()) {
-            loggerRedeco.info("La ruta especificada no es un directorio válido. " + urlNas + pathRedeco);
-            return null;
+        	String error = "La ruta especificada no es un directorio válido. " + urlNas + pathRedeco;
+            loggerRedeco.error(error);
+            throw new Exception(error);
         }
+                
+        File[] files = directorioCsv.listFiles(archivosFilter);
+        List<File> archEncontrados = new ArrayList<File>();
 
-        // Nombre del archivo 
-        String nombreArchivoEsperado = "REPORTE REDECO.xlsx"; //!Nombre de archivo configurar en properties
+        //Listamos en un ciclo for los resultados
+        for (File f : files) {
+        	loggerRedeco.info("Archivo encontrado: " + f.getName());
 
-        // Ruta completa del archivo que estás esperando
-        File archivoEsperado = new File(directorioCsv, nombreArchivoEsperado);
+            long previousSize = 0;
 
-        long previousSize = 0;
+            int intentos = 0;
+            while (intentos < 60) {
+                long currentSize = f.length();
 
-        while (true) {
-            long currentSize = archivoEsperado.length();
+                if (currentSize == previousSize) {
+                    // El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado
+                    loggerRedeco.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
+                	archEncontrados.add(f);
+                    break;  // Salir del bucle
+                }
 
-            if (currentSize == previousSize) {
-                // El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado
-                loggerRedeco.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
-                break;  // Salir del bucle
+                // Esperar 1 segundo antes de volver a verificar
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    // Manejar interrupciones si es necesario
+                }
+
+                previousSize = currentSize;
+                intentos++;
             }
-
-            // Esperar 1 segundo antes de volver a verificar
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                // Manejar interrupciones si es necesario
-            }
-
-            previousSize = currentSize;
+                        
         }
         
-        if (archivoEsperado.exists()) {
-            return new File[] { archivoEsperado };
+        if (archEncontrados.size() > 0) {
+            return archEncontrados;
         }else{
-            loggerRedeco.info("El archivo esperado " + nombreArchivoEsperado + " no fue encontrado.");
-            return null;
+        	String error = "No se encontraron archivos para redeco quejas.";
+            loggerRedeco.error(error);
+            throw new Exception(error);
         }
 
     }
@@ -354,6 +398,5 @@ public class CondusefBussines {
         String fechaFormateada = dateFormat.format(fecha);
         return fechaFormateada;
     }
-        
-        
+    
 }

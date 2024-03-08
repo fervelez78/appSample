@@ -14,12 +14,13 @@ import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
-import mx.bancosabadell.condusef.models.Queja;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.models.ResponseRedecoService;
 import mx.bancosabadell.condusef.services.CondusefBussines;
 import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
+import mx.bancosabadell.condusef.services.LatiniaMailService;
+import mx.bancosabadell.condusef.services.MailService;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
@@ -33,42 +34,50 @@ public class ClientRedeco extends ClientConducef{
     //Logica de negocio
     private CondusefBussines condusefBussines = new CondusefBussines();
     
-    @Override
     public String getQuejas() {
         logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);    
         String response = new String();
+        String error = "";
         try {
             response = get(urlBase+pathRedeco, tokenAccess);
             logger.info("Response redeco endpoin: " + ConfigConstants.URL_API_REDECO + "n/"+ response);
         } catch (HttpResponseException e) {
             // Manejar errores específicos de la respuesta HTTP
-            logger.error("Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" +e.getResponseBody());
+            error = "Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" +e.getResponseBody();
+            logger.error(error);
         } catch (NetworkException e) {
             // Manejar errores de red
-            logger.error("Error de red: " + e.getDetail() +" - ");
+            error = "Error de red: " + e.getDetail() +" - ";
+            logger.error(error);
         } catch (Exception e) {
             // Manejar cualquier otro error
-            logger.error("Error inesperado: " + e.getMessage());
+            error = "Error inesperado: " + e.getMessage();
+            logger.error(error);
         }
+    	if (!error.equals("")) {
+    		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
+	        MailService mail = new LatiniaMailService(); 
+	    	mail.send(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en REDECO", error);
+    	}
         logger.info("FIN CONSULTA REDECO");
         return response;
     }
 
     
-    @Override
-    public ResponseRedeco postQuejas() {
+    public ResponseRedeco postQuejas() throws Exception{
         logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);
     
         // Se obtiene una lista de quejas cvs desde un documento cvs o txt
         List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBenXlsx();
     
         // Se obtiene un ResponseRedeco con lista de quejas que se mapean desde la lista de quejas cvs
-        
         ResponseRedeco responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
         
-        List<Queja> quejas = new ArrayList<>();
-
-       
+        // Valida el response
+        if (responseRedeco == null || responseRedeco.getQuejas() == null || 
+        		responseRedeco.getQuejas().size() == 0)
+        	throw new Exception("No se encontraron registros en el archivo");
+        
         // Verificar si hay errores de validación
         if (responseRedeco.getErrorsValidate() == null && responseRedeco.getError() == null) {
             try {
@@ -77,7 +86,7 @@ public class ClientRedeco extends ClientConducef{
                 objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
                 String requestQuejaTojson = objectMapper.writeValueAsString(/* quejas */responseRedeco.getQuejas());
     
-                //logger.info("Request del cliente: " + requestQuejaTojson);
+                logger.info("Request del cliente: " + requestQuejaTojson);
     
                 // Crear el request que se mandará en la petición http
                 RequestBody requestBody = RequestBody.create(requestQuejaTojson, MediaType.parse("application/json; charset=utf-8"));
@@ -94,30 +103,34 @@ public class ClientRedeco extends ClientConducef{
                             listErrors.add(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio());
 
                           /*   System.out.println(error.getQueja().getErrors() + " : " + error.getQueja().getQuejasFolio()); */
-                            logger.info(error.getQueja().getErrors() + " : "+ error.getQueja().getQuejasFolio());
+                            logger.error(error.getQueja().getErrors() + " : "+ error.getQueja().getQuejasFolio());
                         }
                     
-                }
+               }
     
                 logger.info("Respuesta redeco codigo estado " + response.getCode() + " - endpoint: " + ConfigConstants.URL_API_REDECO);
     
             } catch (JsonProcessingException e) {
                 // Manejar errores de procesamiento JSON
-                handleJsonProcessingException(e, responseRedeco);
+            	logger.error("Error JSON processesing: " + e.getMessage());
+            	handleJsonProcessingException(e, responseRedeco);
     
             } catch (HttpResponseException e) {
+            	logger.error("Error HttpResponse: " + e.getMessage());
                 // Manejar errores específicos de la respuesta HTTP
                 handleHttpResponseException(e, responseRedeco);
     
             } catch (NetworkException e) {
+            	logger.error("Error Network: " + e.getMessage());
                 // Manejar errores de red
                 handleNetworkException(e, responseRedeco);
     
             } catch (Exception e) {
+            	logger.error("Error: " + e.getMessage());
                 // Manejar cualquier otro error
                 handleUnexpectedException(e, responseRedeco);
             }
-    
+            
             logger.info("FIN CONSULTA REDECO");
         }
     
@@ -126,9 +139,13 @@ public class ClientRedeco extends ClientConducef{
     }
 
     private void handleJsonProcessingException(JsonProcessingException e, ResponseRedeco responseRedeco) {
-        logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
+        String errorMessage = "Error de procesamiento JSON: " + e.getMessage();
+    	logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
         responseRedeco.getQuejas().clear();
-        responseRedeco.setError("Error de procesamiento JSON: " + e.getMessage());
+        responseRedeco.setError(errorMessage);
+        if (responseRedeco.getErrores() == null)
+        	responseRedeco.setErrores(new ArrayList<String>());
+        responseRedeco.getErrores().add(errorMessage);
     }
     
     private void handleHttpResponseException(HttpResponseException e, ResponseRedeco responseRedeco) {
@@ -136,6 +153,9 @@ public class ClientRedeco extends ClientConducef{
         logger.error(errorMessage);
         responseRedeco.getQuejas().clear();
         responseRedeco.setError(errorMessage);
+        if (responseRedeco.getErrores() == null)
+        	responseRedeco.setErrores(new ArrayList<String>());
+        responseRedeco.getErrores().add(errorMessage);
     }
     
     private void handleNetworkException(NetworkException e, ResponseRedeco responseRedeco) {
@@ -143,6 +163,9 @@ public class ClientRedeco extends ClientConducef{
         logger.error(errorMessage);
         responseRedeco.getQuejas().clear();
         responseRedeco.setError(errorMessage);
+        if (responseRedeco.getErrores() == null)
+        	responseRedeco.setErrores(new ArrayList<String>());
+        responseRedeco.getErrores().add(errorMessage);
     }
     
     private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
@@ -150,6 +173,9 @@ public class ClientRedeco extends ClientConducef{
         logger.error(errorMessage, e);
         responseRedeco.getQuejas().clear();
         responseRedeco.setError(errorMessage);
+        if (responseRedeco.getErrores() == null)
+        	responseRedeco.setErrores(new ArrayList<String>());
+        responseRedeco.getErrores().add(errorMessage);
     }
     
 }
