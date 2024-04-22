@@ -14,6 +14,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -31,18 +41,23 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
+import mx.bancosabadell.condusef.models.Consulta;
+import mx.bancosabadell.condusef.models.ConsultaData;
 import mx.bancosabadell.condusef.models.InfoValidate;
 import mx.bancosabadell.condusef.models.Queja;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
+import mx.bancosabadell.condusef.models.ResponseReune;
 
 public class CondusefBussines {
     
     private static final Logger loggerRedeco = LoggerFactory.getLogger("clientRedecoLogger");
+    private static final Logger loggerReune = LoggerFactory.getLogger("clientReuneLogger");
     
     public String urlNas = ConfigConstants.DIR_NAS;
 
     public String pathRedeco = ConfigConstants.DIR_NAS_REDECO;
+    public String pathReune = ConfigConstants.DIR_NAS_REUNE;
     
     public String urlNasLog = ConfigConstants.DIR_NAS_LOGS;
     
@@ -152,12 +167,59 @@ public class CondusefBussines {
         return responseRedeco;
     }
 
+    public ResponseReune mapperDocumentConsulta(List<ConsultaData> consultaDataList) {
+        ResponseReune responseReune = new ResponseReune();
+        List<InfoValidate> listInfoValidate = new ArrayList<>();
+        List<Consulta> consultaList = new ArrayList<>();
+
+        try {
+            for (ConsultaData consultaData : consultaDataList) {
+                Consulta consulta = new Consulta();
+                consulta.setInstitucionClave(consultaData.getInstitucionClave());
+                consulta.setSector(consultaData.getSector());
+                consulta.setConsultasTrim(consultaData.getConsultasTrim());
+                consulta.setNumConsultas(consultaData.getNumConsultas());
+                consulta.setConsultasFolio(consultaData.getConsultasFolio());
+                consulta.setConsultasEstatusCon(consultaData.getConsultasEstatusCon());
+                consulta.setConsultasFecAten(consultaData.getConsultasFecAten());
+                consulta.setEstadosId(consultaData.getEstadosId());
+                consulta.setConsultasFecRecepcion(consultaData.getConsultasFecRecepcion());
+                consulta.setMediosId(consultaData.getMediosId());
+                consulta.setProducto(consultaData.getProducto());
+                consulta.setCausaId(String.valueOf(consultaData.getCausaId()));
+                consulta.setConsultasCP((consultaData.getConsultasCP()));
+                consulta.setConsultasMpioId(consultaData.getConsultasMpioId());
+                consulta.setConsultasLocId(consultaData.getConsultasLocId());
+                consulta.setConsultasColId(consultaData.getConsultasColId());                
+                consulta.setConsultascatnivelatenId(consultaData.getConsultascatnivelatenId());
+                consulta.setConsultasPori(consultaData.getConsultasPori());
+
+                // Validar la consulta antes de agregarla a la lista
+                loggerReune.info("Enviando consulta " + consulta.getConsultasFolio());
+                responseReune = validateConsulta(consulta, responseReune, listInfoValidate, consultaList);
+                consultaList.add(consulta);
+
+            }
+        } catch (Exception e) {
+            loggerRedeco.error("Error: " + e.getMessage());
+            handleUnexpectedException(e, responseReune);
+        }
+        return responseReune;
+    }
+
     private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
         String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE REDECO.xlsx";
         loggerRedeco.error(errorMessage);
         List<Queja> quejas = new ArrayList<>();
         responseRedeco.setQuejas(quejas);
         responseRedeco.setError(errorMessage);
+    }
+    private void handleUnexpectedException(Exception e, ResponseReune responseReune) {
+        String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE_REUNE.xlsx";
+        loggerReune.error(errorMessage);
+        List<Consulta> consultas = new ArrayList<>();
+        responseReune.setConsultas(consultas);
+        responseReune.setError(errorMessage);
     }
 
     public ResponseRedeco validateQueja(Queja queja, ResponseRedeco responseRedeco,  List<InfoValidate> listInfoValidate, List<Queja> quejaList){
@@ -198,10 +260,46 @@ public class CondusefBussines {
        return responseRedeco;
     }
     
+    public ResponseReune validateConsulta(Consulta consulta, ResponseReune responseReune, List<InfoValidate> listInfoValidate, List<Consulta> consultaList) {
+        try {
+            ValidatorFactory validatorFactory = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory();
+    
+            Validator validator = validatorFactory.getValidator();
+    
+            Set<ConstraintViolation<Consulta>> violations = validator.validate(consulta);
+    
+            if (!violations.isEmpty()) {
+                for (ConstraintViolation<Consulta> violation : violations) {
+    
+                    InfoValidate errorinfoValidate = new InfoValidate("Error en consulta con Folio: " + consulta.getConsultasFolio() + "\n" + "Mensaje: " + violation.getMessage());
+    
+                    responseReune.setErrorsValidate(listInfoValidate);
+                    responseReune.getErrorsValidate().add(errorinfoValidate);
+                    loggerReune.info(errorinfoValidate.getMessageError());
+                }
+            } else {
+                responseReune.setConsultas(consultaList);
+                responseReune.getConsultas().add(consulta);
+                loggerReune.info("La carga de la consulta con folio " + consulta.getConsultasFolio() + " fue correcta");
+    
+            }
+        } catch (Exception e) {
+            InfoValidate errorinfoValidate = new InfoValidate("Error al procesar las consultas" + e.getCause());
+    
+            responseReune.getErrorsValidate().add(errorinfoValidate);
+            loggerReune.error("Error al procesar las consultas", e.getCause());
+    
+        }
+    
+        return responseReune;
+    }
     public List<QuejasData> parseDocumentToBen() throws Exception{
         //!Mejorar captura de exepciones
         //Se buscan los archivos .txt desde la carpeta dada el cual regresa una lista de archivos
-    	List<File> archivosEnDirectorio = findDocument();
+    	List<File> archivosEnDirectorio = findDocument(pathRedeco);
 
         List<QuejasData> quejasDataList = new ArrayList<>();
 
@@ -240,7 +338,7 @@ public class CondusefBussines {
 
     public List<QuejasData> parseDocumentToBenXlsx() throws Exception {
     	
-    	List<File> archivosEnDirectorio = findDocument();
+    	List<File> archivosEnDirectorio = findDocument(pathRedeco);
         
         List<QuejasData> quejasDataList = new ArrayList<>();
     
@@ -323,6 +421,8 @@ public class CondusefBussines {
         return quejasDataList;
     }
 
+    
+
     // Creamos nuestro filtro de archivos o ficheros
     FileFilter archivosFilter = new FileFilter() {
         //Sobreescribimos el método
@@ -330,7 +430,7 @@ public class CondusefBussines {
             // Nombre del archivo los nombres aceptados son: 
             // REDECO_QUEJAS.xlsx, REDECO_QUEJAS_[YYYYMMDD].xlsx, REDECO_QUEJAS_[YYYYMMDDHHMM].xlsx
             String nombreArchivoEsperado = ConfigConstants.REG_EXP_QUEJAS_REDECO; 
-            loggerRedeco.info("Expresion regular redeco quejas: " + nombreArchivoEsperado);
+            loggerRedeco.info("Expresion regular redeco quejas: " + nombreArchivoEsperado + " " + file.getName());
 
         	if (file.getName().matches(nombreArchivoEsperado)) {
                 return true;
@@ -338,14 +438,145 @@ public class CondusefBussines {
             return false;
         }
     };
-    
-    public List<File> findDocument() throws Exception{
-        // Directorio donde se copian los archivos
-        File directorioCsv = new File(urlNas + pathRedeco);
 
+    public List<ConsultaData> parseDocumentToBenXlsxReune() throws Exception {
+        List<File> archivosEnDirectorio = findDocument(pathReune);
+        List<ConsultaData> consultasList = new ArrayList<>();
+
+        if (archivosEnDirectorio != null) {
+            for (File archivo : archivosEnDirectorio) {
+                if (archivo.isFile() && archivo.getName().toLowerCase().endsWith(".xlsx")) {
+                    try (FileInputStream fis = new FileInputStream(archivo);
+                         Workbook workbook = new XSSFWorkbook(fis)) {
+
+                        Sheet sheet = workbook.getSheetAt(0);
+
+                        int totalFilas = sheet.getPhysicalNumberOfRows();
+
+                        // Iterar sobre cada fila
+                        for (int i = 1; i < totalFilas; i++) {
+                            Row row = sheet.getRow(i);
+                            
+
+                            ConsultaData consultaData = new ConsultaData();
+
+                            // Establecer los atributos de la consulta
+                            consultaData.setInstitucionClave(row.getCell(0).getStringCellValue());
+                            consultaData.setSector(row.getCell(1).getStringCellValue());
+                            consultaData.setConsultasTrim((int) row.getCell(2).getNumericCellValue());
+                            consultaData.setNumConsultas((int) row.getCell(3).getNumericCellValue());
+                            consultaData.setConsultasFolio(row.getCell(4).getStringCellValue());
+                            consultaData.setConsultasEstatusCon((int) row.getCell(5).getNumericCellValue());
+
+                            SimpleDateFormat formatoDeseado = new SimpleDateFormat("dd/MM/yyyy");
+
+                            Date fechaExcel = row.getCell(6).getDateCellValue();
+                            
+                            String fechaFormateada = formatoDeseado.format(fechaExcel);
+
+                            consultaData.setConsultasFecAten(fechaFormateada);
+
+                            consultaData.setEstadosId((int) row.getCell(7).getNumericCellValue());
+                          
+                            fechaExcel = row.getCell(8).getDateCellValue();
+                            fechaFormateada = formatoDeseado.format(fechaExcel);
+
+                            consultaData.setConsultasFecRecepcion(fechaFormateada);
+
+                            consultaData.setMediosId((int) row.getCell(9).getNumericCellValue());
+                            consultaData.setProducto(row.getCell(10).getStringCellValue());
+
+                            Cell cell = row.getCell(11);
+                            String valorComoString = null;
+
+                            if (cell != null) {
+                                if (cell.getCellType() == CellType.NUMERIC) {
+                                    // Si la celda contiene un valor numérico, lo convertimos a String
+                                    valorComoString = String.valueOf((int) cell.getNumericCellValue());
+                                } else if (cell.getCellType() == CellType.STRING) {
+                                    // Si la celda contiene una cadena, la obtenemos directamente
+                                    valorComoString = cell.getStringCellValue().trim();
+                                }
+                            }
+                            consultaData.setCausaId(valorComoString);
+
+                            consultaData.setConsultasCP((long)row.getCell(12).getNumericCellValue());
+                            consultaData.setConsultasMpioId((int) row.getCell(13).getNumericCellValue());
+                            if (row.getCell(14) != null) {
+                                consultaData.setConsultasLocId((int) row.getCell(14).getNumericCellValue());
+                            }
+                            if (row.getCell(15) != null) {
+                                consultaData.setConsultasColId((int) row.getCell(15).getNumericCellValue());
+                            }
+                            consultaData.setConsultascatnivelatenId((int) row.getCell(16).getNumericCellValue());
+                            consultaData.setConsultasPori(row.getCell(17).getStringCellValue().toUpperCase());
+
+                            
+                            consultasList.add(consultaData);
+                        }
+
+                        // Cerrar el archivo
+                        loggerReune.info("Cerrando el archivo " + archivo.getPath() + " -> " + urlNas + pathRedeco + urlHistorico + archivo.getName());
+
+                        try {
+                        	workbook.close();
+                        	fis.close();
+                        }catch(Exception e) {
+                        	loggerReune.info(e.getMessage());
+                        }
+
+                          // Movemos el archivo al histórico
+                          loggerReune.info("Copiando archivo " + archivo.getPath());
+
+                          Path origenPath = FileSystems.getDefault().getPath(archivo.getPath());
+                          Path destinoPath = FileSystems.getDefault().getPath(urlNas + pathRedeco + urlHistorico + archivo.getName());
+
+                          // Crear la carpeta historico si no existe
+                        File historico = new File(urlNas + pathRedeco + urlHistorico);
+                        if (!historico.exists()) {
+                        	loggerRedeco.info("Creando direcotrio " + historico.getPath());
+                        	historico.mkdir();
+                        }
+                         // Movemos el archivo a la carpeta de histórico
+                         try {
+                            Files.move(origenPath, destinoPath, StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            loggerRedeco.info(e.getMessage());
+                        }
+
+                    } catch (IOException | EncryptedDocumentException e) {
+                        loggerReune.error("Error: " + e.getMessage());
+                    	e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            loggerReune.error("No se pudieron listar los archivos en el directorio.");
+            return null;
+        }
+
+        return consultasList;
+    }
+    
+    public List<File> findDocument(String pathNasDirectoriReuneOrRedeco) throws Exception{
+        // Directorio donde se copian los archivos
+        File directorioCsv = new File(urlNas + pathNasDirectoriReuneOrRedeco);
+
+        if (pathNasDirectoriReuneOrRedeco == pathRedeco) {
+            
+            loggerRedeco.info(urlNas + pathRedeco);
+        } else {
+            loggerReune.info(urlNas + pathRedeco);
+            
+        }
         if (!directorioCsv.isDirectory()) {
-        	String error = "La ruta especificada no es un directorio válido. " + urlNas + pathRedeco;
-            loggerRedeco.error(error);
+        	String error = "La ruta especificada no es un directorio válido. " + urlNas + pathNasDirectoriReuneOrRedeco;
+            if (pathNasDirectoriReuneOrRedeco == pathRedeco) {            
+                loggerRedeco.error(error);
+            } else {
+                loggerReune.error(error);
+            }
+
             throw new Exception(error);
         }
                 
@@ -354,7 +585,13 @@ public class CondusefBussines {
 
         //Listamos en un ciclo for los resultados
         for (File f : files) {
-        	loggerRedeco.info("Archivo encontrado: " + f.getName());
+            
+            if (pathNasDirectoriReuneOrRedeco == pathRedeco) {            
+                loggerRedeco.info("Archivo encontrado: " + f.getName());
+            } else {
+                loggerReune.info("Archivo encontrado: " + f.getName());
+            }
+        	
 
             long previousSize = 0;
 
@@ -364,7 +601,12 @@ public class CondusefBussines {
 
                 if (currentSize == previousSize) {
                     // El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado
-                    loggerRedeco.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
+                    if (pathNasDirectoriReuneOrRedeco == pathRedeco) {            
+                        loggerRedeco.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
+                    } else {
+                        loggerReune.info("El tamaño del archivo se ha estabilizado, la copia probablemente ha finalizado");
+                    }
+                   
                 	archEncontrados.add(f);
                     break;  // Salir del bucle
                 }
@@ -386,7 +628,8 @@ public class CondusefBussines {
         if (archEncontrados.size() > 0) {
             return archEncontrados;
         }else{
-        	String error = "No se encontraron archivos para redeco quejas.";
+
+        	String error = (pathNasDirectoriReuneOrRedeco == pathRedeco) ? "No se encontraron archivos para redeco quejas.": "No se encontraron archivos para reune consultas.";
             loggerRedeco.error(error);
             throw new Exception(error);
         }

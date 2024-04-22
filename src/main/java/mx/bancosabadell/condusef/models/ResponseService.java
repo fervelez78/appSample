@@ -3,9 +3,9 @@ package mx.bancosabadell.condusef.models;
 import lombok.Data;
 
 @Data
-public class ResponseRedecoService {
+public class ResponseService {
 
-    public ResponseRedecoService(String body, int code, String message) {
+    public ResponseService(String body, int code, String message) {
         this.body = body;
         this.code = code;
         this.message = message;

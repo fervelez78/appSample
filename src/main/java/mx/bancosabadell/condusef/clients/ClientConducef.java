@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
-import mx.bancosabadell.condusef.models.ResponseRedecoService;
+import mx.bancosabadell.condusef.models.ResponseService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -86,7 +86,7 @@ public abstract class ClientConducef {
     
 
     //Metodos http post via OkHttp para la comunicacion con conseft
-    public ResponseRedecoService post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
+    public ResponseService post(String url, String token, RequestBody requestBody) throws HttpResponseException, NetworkException {
         //
     	logger.info("url: " + url);
     	logger.info("token: " + token);
@@ -104,7 +104,7 @@ public abstract class ClientConducef {
         try {
             response = clientCondusef.newCall(request).execute();
             
-            ResponseRedecoService responseRedecoService = new ResponseRedecoService(response.body().string(), response.code(), response.message());
+            ResponseService responseRedecoService = new ResponseService(response.body().string(), response.code(), response.message());
             
             if (!response.isSuccessful()) {
                 

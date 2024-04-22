@@ -16,7 +16,7 @@ import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
-import mx.bancosabadell.condusef.models.ResponseRedecoService;
+import mx.bancosabadell.condusef.models.ResponseService;
 import mx.bancosabadell.condusef.services.CondusefBussines;
 import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
 import mx.bancosabadell.condusef.services.LatiniaMailService;
@@ -39,7 +39,7 @@ public class ClientRedeco extends ClientConducef{
         String response = new String();
         String error = "";
         try {
-            response = get(urlBase+pathRedeco, tokenAccess);
+            response = get(pathRedeco, tokenAccess);
             logger.info("Response redeco endpoin: " + ConfigConstants.URL_API_REDECO + "n/"+ response);
         } catch (HttpResponseException e) {
             // Manejar errores específicos de la respuesta HTTP
@@ -54,11 +54,11 @@ public class ClientRedeco extends ClientConducef{
             error = "Error inesperado: " + e.getMessage();
             logger.error(error);
         }
-    	if (!error.equals("")) {
+    	/* if (!error.equals("")) {
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
 	        MailService mail = new LatiniaMailService(); 
 	    	mail.send(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en REDECO", error);
-    	}
+    	} */
         logger.info("FIN CONSULTA REDECO");
         return response;
     }
@@ -92,7 +92,7 @@ public class ClientRedeco extends ClientConducef{
                 RequestBody requestBody = RequestBody.create(requestQuejaTojson, MediaType.parse("application/json; charset=utf-8"));
     
                 // Realizar la petición HTTP
-                ResponseRedecoService response = post(urlBase + pathRedeco, tokenAccess, requestBody);
+                ResponseService response = post(pathRedeco, tokenAccess, requestBody);
                 String responseToString = response.getBody();
                 // Parsear la respuesta a ResponseRedeco
                 ObjectMapper objectMapperResponse = new ObjectMapper();
