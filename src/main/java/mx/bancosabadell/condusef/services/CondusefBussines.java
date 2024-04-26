@@ -157,7 +157,7 @@ public class CondusefBussines {
                 queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
                 queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
                 queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
-                loggerRedeco.info("Enviando queja " + queja.getQuejasFolio());
+                loggerRedeco.info("Cargado queja " + queja.getQuejasFolio());
                 responseRedeco = validateQueja(queja, responseRedeco, listInfoValidate, quejaList);  
             }
         } catch (Exception e) {
@@ -195,7 +195,7 @@ public class CondusefBussines {
                 consulta.setConsultasPori(consultaData.getConsultasPori());
 
                 // Validar la consulta antes de agregarla a la lista
-                loggerReune.info("Enviando consulta " + consulta.getConsultasFolio());
+                loggerReune.info("Cargando consulta " + consulta.getConsultasFolio());
                 responseReune = validateConsulta(consulta, responseReune, listInfoValidate, consultaList);
                 consultaList.add(consulta);
 
@@ -365,7 +365,13 @@ public class CondusefBussines {
                             quejasData.setMedioId(String.valueOf((int) row.getCell(6).getNumericCellValue()));
                             quejasData.setNivelATId(String.valueOf((int) row.getCell(7).getNumericCellValue()));
                             quejasData.setProduct(row.getCell(8).getStringCellValue());
-                            quejasData.setCausasId(row.getCell(9).getStringCellValue());
+                            if (row.getCell(9).getCellType() == CellType.NUMERIC) {
+                                // Si la celda contiene un valor numérico, lo convertimos a String                                     
+                                quejasData.setCausasId(String.valueOf(row.getCell(9).getNumericCellValue()));
+                            } else if (row.getCell(9).getCellType() == CellType.STRING) {
+                                // Si la celda contiene una cadena, la obtenemos directamente 
+                                quejasData.setCausasId(row.getCell(9).getStringCellValue());
+                            }                       
                             quejasData.setQuejasPORI(row.getCell(10).getStringCellValue());
                             quejasData.setEstadosId(String.valueOf((int) row.getCell(11).getNumericCellValue()));
                             quejasData.setQuejasEstatus(String.valueOf((int) row.getCell(12).getNumericCellValue()));
@@ -430,7 +436,6 @@ public class CondusefBussines {
             // Nombre del archivo los nombres aceptados son: 
             // REDECO_QUEJAS.xlsx, REDECO_QUEJAS_[YYYYMMDD].xlsx, REDECO_QUEJAS_[YYYYMMDDHHMM].xlsx
             String nombreArchivoEsperado = ConfigConstants.REG_EXP_QUEJAS_REDECO; 
-            loggerRedeco.info("Expresion regular redeco quejas: " + nombreArchivoEsperado + " " + file.getName());
 
         	if (file.getName().matches(nombreArchivoEsperado)) {
                 return true;
@@ -566,9 +571,10 @@ public class CondusefBussines {
             
             loggerRedeco.info(urlNas + pathRedeco);
         } else {
-            loggerReune.info(urlNas + pathRedeco);
+            loggerReune.info(urlNas + pathReune);
             
         }
+        
         if (!directorioCsv.isDirectory()) {
         	String error = "La ruta especificada no es un directorio válido. " + urlNas + pathNasDirectoriReuneOrRedeco;
             if (pathNasDirectoriReuneOrRedeco == pathRedeco) {            

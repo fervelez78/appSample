@@ -101,6 +101,8 @@ public class ClientReune extends ClientConducef{
 
         logger.info("REUNE " + ConfigConstants.URL_API_REUNE);
         logger.info("FIN CARGA Reune");
+    }else{
+        logger.info("Se obtivieron errores en el archivo");
     }
 
     return responseReune; 

@@ -133,6 +133,7 @@ public class ClientRedeco extends ClientConducef{
             
             logger.info("FIN CONSULTA REDECO");
         }
+        
     
         return responseRedeco;
 

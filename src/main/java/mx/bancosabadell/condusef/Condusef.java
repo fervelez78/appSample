@@ -1,5 +1,9 @@
 package mx.bancosabadell.condusef;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.xalan.xsltc.compiler.sym;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +21,15 @@ import mx.bancosabadell.condusef.services.LatiniaServiceImplEmail;
 public class Condusef{
 
     private static final Logger logger = LoggerFactory.getLogger("condusefLogger");
+    private static final Logger loggerRedeco = LoggerFactory.getLogger("clientRedecoLogger");
+	private static final Logger loggerReune = LoggerFactory.getLogger("clientReuneLogger");
     
     public static void main( String[] args ){
     	System.out.println("Entrando a la aplicación");
         logger.info("Inicio prueba");
         if (args.length == 0) {
         	logger.error("Debe especificar un método a ejecutar como argumento.");
-			System.out.println("Debe especificar un método a ejecutar como argumento.: \n1) envioQuejas, \n2) envioConsulta, \n3) emailRecordatorio");
+			System.out.println("Debe especificar un método a ejecutar como argumento.: \n1) REDECO, \n2) REUNE, \n3) Email_Recordatorio \n4) REUNE/REDECO");
             return;
         }
         
@@ -32,28 +38,74 @@ public class Condusef{
 
         // Ejecutar el método correspondiente
         switch (methodName) {
-            case "envioQuejas":
+            case "REDECO":
                 ClientRedeco redeco = new ClientRedeco();
                 Monitor monitor = new Monitor();
-            	logger.info("REDECO buscando archivos de quejas...");
-                envioQuejas(redeco,monitor);
-            	//logger.info("REUNE buscando informe trimestral...");
-                //ClientConducef reune = new ClientReune();
+
+				System.out.println("Inicio Carga REDECO");
+				envioQuejas(redeco,monitor);
+				System.out.println("Fin Carga REDECO");
+
+				
+
+            	logger.info("REDECO buscando archivos");
+				
+			
                 break;
-				case "envioConsulta":
-                ClientReune reune = new ClientReune();
-                Monitor monitorConsultas = new Monitor();
-               
-            	logger.info("REUNE buscando archivos de quejas...");
-                envioConsulta(reune, monitorConsultas);            	
-                break;
-            case "emailRecordatorio":
+				case "REUNE" : 
+					ClientReune reune = new ClientReune();
+					Monitor monitorConsultas = new Monitor();
+
+					System.out.println("Inicio Carga REUNE");
+					envioConsulta(reune, monitorConsultas);   
+					System.out.println("Fin Carga REUNE"); 
+				break;
+            case "NOTIFICACION_REDECO":
             	logger.info("Validando si se ha enviado el informe...");
                  monitor = new Monitor();
-                 emailRecordatorio(monitor);
+                 emailRecordatorio(monitor, "REDECO");
                 break;
+            case "NOTIFICACION_REUNE":
+            	logger.info("Validando si se ha enviado el informe...");
+                 monitor = new Monitor();
+                 emailRecordatorio(monitor, "REUNE");
+                break;
+			/* case "REUNE/REDECO":
+			redeco = new ClientRedeco();
+			monitor = new Monitor();
+
+			reune = new ClientReune();
+			monitorConsultas = new Monitor();
+		   try {
+			   List<String> namesFiles = monitor.readFolders();
+
+			   for (String nameFile : namesFiles) {
+				   switch (nameFile) {
+					   case  ConfigConstants.NAME_FILE_REDECO:
+						   logger.info("REDECO buscando archivos de quejas... ");
+						   System.out.println("Inicio Carga REDECO");
+						   envioQuejas(redeco,monitor);
+						   System.out.println("Fin Carga REDECO");
+						   break;
+					   case ConfigConstants.NAME_FILE_REUNE:
+						   logger.info("REDECO buscando archivos de consultas... ");
+						   System.out.println("Inicio Carga REUNE");
+						   envioConsulta(reune, monitorConsultas);   
+						   System.out.println("Fin Carga REUNE"); 
+					   default:
+					   logger.info(nameFile);
+						   break;
+				   }
+			   }
+
+		   } catch (Exception e) {
+			   
+			   e.printStackTrace();
+		   }      
+			break; */
             default:
-            	logger.error("El método especificado no es válido.");
+			
+		   logger.error("El método especificado no es válido.");
         }
 
     }
@@ -83,6 +135,7 @@ public class Condusef{
 	        	String codigos = "";
 	            for (ErrorInfoResponse string : response.getErrors()) {
 	            	logger.error(string.getQueja().getErrors() + " : " + string.getQueja().getQuejasFolio());
+					loggerRedeco.error(string.getQueja().getErrors() + " : " + string.getQueja().getQuejasFolio());
 	            	if (codigos.equals(""))
 	            		codigos = codigos + ", " + string.getQueja().getQuejasFolio();
 	            	else
@@ -90,14 +143,18 @@ public class Condusef{
 	            }
 	        	contenido = "Folios con error: " + codigos;
 	            logger.info("Se obtuvieron errores de redeco " + codigos);
+	            loggerRedeco.info("Se obtuvieron errores de redeco " + codigos);
+				
 	        // Validacion de errores de validación
 	        }else if (response.getErrorsValidate() != null && !response.getErrorsValidate().equals("")) {
                 //
 	        	asunto = "Proceso CONDUSEF: Error de validación";
 	        	logger.error("Se obtuvieron errores de validacion");
+	        	loggerReune.error("Se obtuvieron errores de validacion, envio cancelado");
 	        	String erroresValidacion = "";
 	        	for (InfoValidate string : response.getErrorsValidate()) {
                 	logger.error(string.getMessageError());
+                	loggerRedeco.error(string.getMessageError());
                 	erroresValidacion = erroresValidacion + " " + string.getMessageError();
                 }
 	        	contenido = "Errores: " + erroresValidacion;
@@ -106,6 +163,8 @@ public class Condusef{
 	        	asunto = "Proceso CONDUSEF: Proceso correcto";
 	        	contenido = "Se ejeuctó correctamente el archivo de quejas ";
                 monitor.createState("true");
+				logger.info(contenido + "\nNúmero total de envios: " + response.getNumeroTotalDeEnvios());
+				loggerRedeco.info(contenido + "\n" + response.toString());
 	        }
 	        	        
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
@@ -152,33 +211,41 @@ public class Condusef{
 	        	logger.error("Se tuvo un error general: " + response.getError());
 	        // Validamos si hay errores por ticket
 	        } else if (response.getErrors() != null && response.getErrors().size() > 0){
-	        	asunto = "Proceso CONDUSEF: Error en REDECO";
+	        	asunto = "Proceso CONDUSEF: Error en REUNE";
 	        	String codigos = "";
 	            for (ErrorInfoResponse string : response.getErrors()) {
 	            	logger.error(string.getConsulta().getErrors() + " : " + string.getConsulta().getConsultasFolio());
+					loggerReune.error(string.getConsulta().getErrors() + " : " + string.getConsulta().getConsultasFolio());
 	            	if (codigos.equals(""))
 	            		codigos = codigos + ", " + string.getConsulta().getConsultasFolio();
 	            	else
 	            		codigos = string.getConsulta().getConsultasFolio();
 	            }
 	        	contenido = "Folios con error: " + codigos;
-	            logger.info("Se obtuvieron errores de redeco " + codigos);
+	            logger.info("Se obtuvieron errores de reune " + codigos);
+	            loggerReune.error("Se obtuvieron errores de reune " + codigos);
+				
 	        // Validacion de errores de validación
 	        }else if (response.getErrorsValidate() != null && !response.getErrorsValidate().equals("")) {
                 //
 	        	asunto = "Proceso CONDUSEF: Error de validación";
 	        	logger.error("Se obtuvieron errores de validacion");
+	        	loggerReune.error("Se obtuvieron errores de validacion, envio cancelado");
 	        	String erroresValidacion = "";
 	        	for (InfoValidate string : response.getErrorsValidate()) {
                 	logger.error(string.getMessageError());
+                	loggerReune.error(string.getMessageError());
                 	erroresValidacion = erroresValidacion + " " + string.getMessageError();
                 }
 	        	contenido = "Errores: " + erroresValidacion;
 	        	
 	        }else {
 	        	asunto = "Proceso CONDUSEF: Proceso correcto";
-	        	contenido = "Se ejeuctó correctamente el archivo de quejas ";
+	        	contenido = "Se ejeuctó correctamente el archivo de consultas ";
                 monitor.createState("true");
+				loggerReune.info(contenido + "\n" + response.toString());
+				logger.info(contenido + "\n" + response.getConsultasEnviadas().toString());
+				
 	        }
 	        	        
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
@@ -211,11 +278,16 @@ public class Condusef{
         }
     }
 
-    private static void emailRecordatorio(Monitor monitor){
+    private static void emailRecordatorio(Monitor monitor, String proceso){
         if (!Boolean.parseBoolean(monitor.readState())) {
         	logger.info("Enviando Correo de recordatorio " + ConfigConstants.CORREO_NOTIF_REDECO);
     		try {
-    			enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Recordatorio", "No se ha enviado el informe de este mes");
+				String mensaje = proceso == "REDECO" ? "No se ha enviado el informe para REDECO de este periodo" : "No se ha enviado el informe para REUNE de este periodo";
+    			enviaCorreo(
+					ConfigConstants.CORREO_NOTIF_REDECO,
+				 	"Proceso CONDUSEF" + proceso + ": \n Recordatorio:",
+				    mensaje);
+
     		}catch(Exception ex) {
     			logger.error(ex.getMessage());
     			ex.printStackTrace();
