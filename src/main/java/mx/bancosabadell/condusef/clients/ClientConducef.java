@@ -2,6 +2,8 @@ package mx.bancosabadell.condusef.clients;
 
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,13 @@ public abstract class ClientConducef {
     private final OkHttpClient clientCondusef;
 
     public ClientConducef(){
-        clientCondusef = new OkHttpClient();
+        logger.info("Se crea el cliente de condusef");
+        logger.info("Proxy: " + ConfigConstants.PROXY_MX_BSAB_HOST + ":" + ConfigConstants.PROXY_MX_BSAB_PORT);
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ConfigConstants.PROXY_MX_BSAB_HOST, Integer.parseInt(ConfigConstants.PROXY_MX_BSAB_PORT)));
+
+        clientCondusef = new OkHttpClient.Builder()
+                .proxy(proxy)
+                .build();
     }
 
     //Metodos http get via OkHttp para la comunicacion con conseft

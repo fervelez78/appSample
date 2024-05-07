@@ -150,6 +150,8 @@
             <properties>
                 <mx.bancosabadell.condusef.url.authenticate>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate?wsdl</mx.bancosabadell.condusef.url.authenticate>
                 <mx.bancosabadell.condusef.url.commonDataCross>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate?wsdl</mx.bancosabadell.condusef.url.commonDataCross>
+                <mx.bancosabadell.condusef.proxy.host>proxy.mx.bsab</mx.bancosabadell.condusef.proxy.host>
+                <mx.bancosabadell.condusef.proxy.port>8080</mx.bancosabadell.condusef.proxy.port>
             </properties>
         </profile>
 		<profile>

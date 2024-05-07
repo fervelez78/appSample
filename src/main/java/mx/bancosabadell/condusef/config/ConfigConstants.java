@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import mx.bancosabadell.condusef.Condusef;
+
 public class ConfigConstants {
 
     public static String DIR_NAS;
@@ -31,18 +33,31 @@ public class ConfigConstants {
     public static String REG_EXP_QUEJAS_REDECO;
     public static String REG_EXP_QUEJAS_REUNE;
 
+    public static String PROXY_MX_BSAB_HOST;
+    public static String PROXY_MX_BSAB_PORT;
+
+
     static {
         Properties prop = new Properties();
+        Properties properties = new Properties();
 
         /* InputStream input = new FileInputStream(URL_CONFIG_FILE) */                  
         try {
         	// InputStream input = ConfigConstants.class.getClassLoader().getResourceAsStream("C:\\Indra\\rep_condusef\\bin\\config.properties")) {
-        	FileInputStream input = new FileInputStream("config.properties");
-            prop.load(input);
+        	
+            ClassLoader loader = Condusef.class.getClassLoader();
+            
+
+        	properties.load(loader.getResourceAsStream("configSystem.properties"));
+        	prop.load(loader.getResourceAsStream("config.properties"));
+        	
         } catch(IOException ex){
             throw new IllegalStateException("Error al cargar el archivo de configuración", ex);
         }
-            
+        
+        PROXY_MX_BSAB_HOST = properties.getProperty("mx.bancosabadell.condusef.proxy.host");
+        PROXY_MX_BSAB_PORT = properties.getProperty("mx.bancosabadell.condusef.proxy.port");
+        
         DIR_NAS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.base");
         DIR_NAS_LOGS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_logs");
         DIR_NAS_REDECO = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_redeco");
