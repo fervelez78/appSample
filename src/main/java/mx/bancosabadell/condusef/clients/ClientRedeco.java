@@ -35,7 +35,7 @@ public class ClientRedeco extends ClientConducef{
     private CondusefBussines condusefBussines = new CondusefBussines();
     
     public String getQuejas() {
-        logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);    
+        logger.info("Inicio request redeco al endpoint: " + pathRedeco);    
         String response = new String();
         String error = "";
         try {

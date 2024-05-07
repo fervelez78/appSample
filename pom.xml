@@ -143,6 +143,25 @@
      
   </dependencies>
 
+  <profiles>
+		<profile>
+            <id>pre</id>
+            
+            <properties>
+                <mx.bancosabadell.condusef.url.authenticate>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate?wsdl</mx.bancosabadell.condusef.url.authenticate>
+                <mx.bancosabadell.condusef.url.commonDataCross>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate?wsdl</mx.bancosabadell.condusef.url.commonDataCross>
+            </properties>
+        </profile>
+		<profile>
+            <id>pro</id>
+            
+            <properties>
+                <mx.bancosabadell.condusef.url.authenticate>https://prod.ibm.mx.bsab:8443/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate_v1?wsdl</mx.bancosabadell.condusef.url.authenticate>
+                <mx.bancosabadell.condusef.url.commonDataCross>https://prod.ibm.mx.bsab:8443/sabadell/servlet/com.dlya.bantotal.odwsbt_CommonDataCross_v1?wsdl</mx.bancosabadell.condusef.url.commonDataCross>
+            </properties>
+        </profile>	
+  </profiles>
+
   <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
@@ -177,8 +196,12 @@
 	        </plugin>
 	  </plugins>
     </pluginManagement>
+    <resources>
+		<resource>
+			<directory>src/main/resources</directory>
+			<filtering>true</filtering>
+		</resource>
+	</resources>
   </build>
-  
-  
   
 </project>

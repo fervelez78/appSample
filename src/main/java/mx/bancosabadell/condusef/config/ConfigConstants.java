@@ -15,6 +15,7 @@ public class ConfigConstants {
 
     
     public static String CORREO_NOTIF_REDECO;
+    public static String CORREO_NOTIF_REUNE;
     public static String URL_SERV_EMAIL;
     
     public static String URL_BASE;
@@ -28,6 +29,7 @@ public class ConfigConstants {
     public static String HEADER_AUTH = "Authorization";
 
     public static String REG_EXP_QUEJAS_REDECO;
+    public static String REG_EXP_QUEJAS_REUNE;
 
     static {
         Properties prop = new Properties();
@@ -49,6 +51,7 @@ public class ConfigConstants {
         DIR_NAS_TIKETS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_tiket");
 
         CORREO_NOTIF_REDECO = prop.getProperty("mx.bancosabadel.conducef.email_notif_redeco");
+        CORREO_NOTIF_REUNE = prop.getProperty("mx.bancosabadel.conducef.email_notif_reune");
         URL_SERV_EMAIL = prop.getProperty("mx.bancosabadel.latinia.url.base");
 
         URL_BASE = prop.getProperty("mx.bancosabadel.conducef.url.base");
@@ -56,6 +59,7 @@ public class ConfigConstants {
         URL_API_REDECO = prop.getProperty("mx.bancosabadel.conducef.url.api_redeco.path");
         TOKEN_CONDUSEF = prop.getProperty("mx.bancosabadel.conducef.token");
         REG_EXP_QUEJAS_REDECO = prop.getProperty("mx.bancosabadel.conducef.file.reg_exp_quejas_redeco");
+        REG_EXP_QUEJAS_REUNE = prop.getProperty("mx.bancosabadel.conducef.file.reg_exp_quejas_reune");
         
     }
 }

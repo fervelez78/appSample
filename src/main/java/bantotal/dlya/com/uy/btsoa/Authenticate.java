@@ -1,14 +1,20 @@
 
 package bantotal.dlya.com.uy.btsoa;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Properties;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
+
+import mx.bancosabadell.condusef.Condusef;
 
 
 /**
@@ -30,9 +36,19 @@ public class Authenticate
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("file:/C:/condusef/Authenticate.wsdl");
-        } catch (MalformedURLException ex) {
-            e = new WebServiceException(ex);
+            //url = new URL("file:/C:/condusef/Authenticate.wsdl");
+            //url = new URL("Authenticate.wsdl");
+        	//url = new URL("https://prod.ibm.mx.bsab:8443/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate_v1?wsdl");
+        	Properties properties= new Properties();
+        	
+        	// properties.load(new FileInputStream(new File("configSystem.properties")));
+        	ClassLoader loader = Condusef.class.getClassLoader();
+        	properties.load(loader.getResourceAsStream("configSystem.properties"));
+        	String authenticate = properties.getProperty("mx.bancosabadell.condusef.url.authenticate");
+        	System.out.println("Authenticate: " + authenticate);
+        	url = new URL(authenticate);
+        }catch (IOException ioe) { 
+        	e = new WebServiceException(ioe);        
         }
         AUTHENTICATE_WSDL_LOCATION = url;
         AUTHENTICATE_EXCEPTION = e;

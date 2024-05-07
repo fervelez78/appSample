@@ -1,11 +1,11 @@
 package mx.bancosabadell.condusef;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.xalan.xsltc.compiler.sym;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import mx.bancosabadell.condusef.clients.ClientRedeco;
 import mx.bancosabadell.condusef.clients.ClientReune;
@@ -23,19 +23,41 @@ public class Condusef{
     private static final Logger logger = LoggerFactory.getLogger("condusefLogger");
     private static final Logger loggerRedeco = LoggerFactory.getLogger("clientRedecoLogger");
 	private static final Logger loggerReune = LoggerFactory.getLogger("clientReuneLogger");
-    
+    /*
+	public Properties loadPropertiesFile(String filePath) {
+
+        Properties prop = new Properties();
+
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            prop.load(resourceAsStream);
+        } catch (IOException e) {
+            System.err.println("Unable to load properties file : " + filePath);
+        }
+
+        return prop;
+
+    }*/
+	
     public static void main( String[] args ){
     	System.out.println("Entrando a la aplicación");
         logger.info("Inicio prueba");
+        
+        /*Condusef app = new Condusef();
+        
+        
+        Properties prop = app.loadPropertiesFile("configSystem.properties");
+        prop.forEach((k, v) -> System.out.println(k + ":" + v));
+        */
+        
         if (args.length == 0) {
         	logger.error("Debe especificar un método a ejecutar como argumento.");
-			System.out.println("Debe especificar un método a ejecutar como argumento.: \n1) REDECO, \n2) REUNE, \n3) Email_Recordatorio \n4) REUNE/REDECO");
+			System.out.println("Debe especificar un método a ejecutar como argumento.: \n1) REDECO, \n2) REUNE, \n3) NOTIFICACION_REDECO \n4) NOTIFICACION_REUNE");
             return;
         }
         
         // Obtener el nombre del método a ejecutar desde los argumentos
         String methodName = args[0];
-
+        logger.info("methodName: " + methodName);
         // Ejecutar el método correspondiente
         switch (methodName) {
             case "REDECO":
@@ -169,8 +191,8 @@ public class Condusef{
 	        	        
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
     		try {
-	        	//enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, asunto, contenido);
-				logger.info("Envio Correo dummi");
+	        	enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, asunto, contenido);
+				//logger.info("Envio Correo dummi");
     		}catch(Exception ex) {
     			logger.error(ex.getMessage());
     		}
@@ -185,8 +207,8 @@ public class Condusef{
     		
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
     		try {
-	        	//enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en inesperado", error);
-				logger.info("Envio Correo dummi");
+	        	enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en inesperado", error);
+				//logger.info("Envio Correo dummi");
     		}catch(Exception ex) {
     			logger.error(ex.getMessage());
     			ex.printStackTrace();
@@ -248,10 +270,10 @@ public class Condusef{
 				
 	        }
 	        	        
-    		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
+    		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REUNE);
     		try {
-	        	//enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, asunto, contenido);
-				logger.info("Envio Correo dummi");
+	        	enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, asunto, contenido);
+				//logger.info("Envio Correo dummi");
     		}catch(Exception ex) {
     			logger.error(ex.getMessage());
     		}
@@ -266,8 +288,8 @@ public class Condusef{
     		
     		logger.info("Enviando correo a " + ConfigConstants.CORREO_NOTIF_REDECO);
     		try {
-	        	//enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en inesperado", error);
-				logger.info("Envio Correo dummi");
+	        	enviaCorreo(ConfigConstants.CORREO_NOTIF_REDECO, "Proceso CONDUSEF: Error en inesperado", error);
+				//logger.info("Envio Correo dummi");
     		}catch(Exception ex) {
     			logger.error(ex.getMessage());
     			ex.printStackTrace();

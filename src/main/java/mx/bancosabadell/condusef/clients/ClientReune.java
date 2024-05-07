@@ -31,7 +31,7 @@ public class ClientReune extends ClientConducef{
     private CondusefBussines condusefBussines = new CondusefBussines();
 
     public ResponseReune postConsultasGeneral() throws Exception {
-        logger.info("INICIO CARGA Reune " +  ConfigConstants.URL_API_REUNE);
+        logger.info("INICIO CARGA Reune " + pathReune);
 
 
         List<ConsultaData> listConsultas = condusefBussines.parseDocumentToBenXlsxReune();
@@ -41,7 +41,8 @@ public class ClientReune extends ClientConducef{
         // Valida el response
         if (responseReune == null || responseReune.getConsultas() == null || 
         		responseReune.getConsultas().size() == 0)
-        	throw new Exception("No se encontraron registros en el archivo");
+        	//throw new Exception("No se encontraron registros en el archivo");
+        	responseReune.setError("No se encontraron registros en el archivo");
         
          // Verificar si hay errores de validación
          if (responseReune.getErrorsValidate() == null && responseReune.getError() == null) {
@@ -56,7 +57,6 @@ public class ClientReune extends ClientConducef{
 
                 // Crear el request que se mandará en la petición http
                 RequestBody requestBody = RequestBody.create(requestConsultaTojson, MediaType.parse("application/json; charset=utf-8"));
-
                 // Realizar la petición HTTP
                 ResponseService response = post(pathReune, tokenAccess, requestBody);
                 String responseToString = response.getBody();
@@ -68,9 +68,7 @@ public class ClientReune extends ClientConducef{
                 if (responseReune.getError() != null) {
                     List<String> listErrors = new ArrayList<>();
                      for ( ErrorInfoResponse error : responseReune.getErrors()) {
-                            listErrors.add(error.getConsulta().getErrors() + " : " + error.getConsulta().getConsultasFolio());
-
-                            
+                            listErrors.add(error.getConsulta().getErrors() + " : " + error.getConsulta().getConsultasFolio());                            
                             logger.error(error.getConsulta().getErrors() + " : "+ error.getConsulta().getConsultasFolio());
                         }
                     

@@ -1,14 +1,21 @@
 
 package bantotal.dlya.com.uy.btsoa;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
+
+import mx.bancosabadell.condusef.Condusef;
 
 
 /**
@@ -30,8 +37,18 @@ public class CommonDataCross
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("file:/C:/condusef/CommonDataCross.wsdl");
-        } catch (MalformedURLException ex) {
+            //url = new URL("file:/C:/condusef/CommonDataCross.wsdl");
+        	//url = new URL("CommonDataCross.wsdl");
+        	//url = new URL("https://prod.ibm.mx.bsab:8443/sabadell/servlet/com.dlya.bantotal.odwsbt_CommonDataCross_v1?wsdl");
+        	Properties properties= new Properties();
+        	//properties.load(new FileInputStream(new File("configSystem.properties")));
+        	ClassLoader loader = Condusef.class.getClassLoader();
+        	properties.load(loader.getResourceAsStream("configSystem.properties"));
+        	String commonDataCross = properties.getProperty("mx.bancosabadell.condusef.url.commonDataCross");
+        	System.out.println("commonDataCross: " + commonDataCross);
+        	//url = new URL("http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_CommonDataCross_v1?wsdl");
+        	url = new URL(commonDataCross);
+        } catch (IOException ex) {
             e = new WebServiceException(ex);
         }
         COMMONDATACROSS_WSDL_LOCATION = url;
