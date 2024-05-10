@@ -1,6 +1,7 @@
 package mx.bancosabadell.condusef.clients;
 
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,12 +67,12 @@ public class ClientRedeco extends ClientConducef{
     
     public ResponseRedeco postQuejas() throws Exception{
         logger.info("Inicio request redeco al endpoint: " + ConfigConstants.URL_API_REDECO);
-    
+        ResponseRedeco responseRedeco = null;
         // Se obtiene una lista de quejas cvs desde un documento cvs o txt
         List<QuejasData> listQuejasData = condusefBussines.parseDocumentToBenXlsx();
     
         // Se obtiene un ResponseRedeco con lista de quejas que se mapean desde la lista de quejas cvs
-        ResponseRedeco responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
+        responseRedeco = condusefBussines.mapperDocumentQueja(listQuejasData);
         
         // Valida el response
         if (responseRedeco == null || responseRedeco.getQuejas() == null || 
@@ -133,7 +134,6 @@ public class ClientRedeco extends ClientConducef{
             
             logger.info("FIN CONSULTA REDECO");
         }
-        
     
         return responseRedeco;
 

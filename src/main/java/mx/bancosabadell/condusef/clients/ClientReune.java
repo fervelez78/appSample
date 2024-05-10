@@ -14,7 +14,6 @@ import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
 import mx.bancosabadell.condusef.models.ConsultaData;
-import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.models.ResponseReune;
 import mx.bancosabadell.condusef.models.ResponseService;
 import mx.bancosabadell.condusef.services.CondusefBussines;
@@ -96,17 +95,16 @@ public class ClientReune extends ClientConducef{
                 handleUnexpectedException(e, responseReune);
             }
         
-
-        logger.info("REUNE " + ConfigConstants.URL_API_REUNE);
-        logger.info("FIN CARGA Reune");
-    }else{
-        logger.info("Se obtivieron errores en el archivo");
+	        logger.info("REUNE " + ConfigConstants.URL_API_REUNE);
+	        logger.info("FIN CARGA Reune");
+	    }else{
+	        logger.info("Se obtivieron errores en el archivo");
+	    }
+	
+	    return responseReune; 
+	    
     }
-
-    return responseReune; 
-    
-}
-private void handleJsonProcessingException(JsonProcessingException e, ResponseReune responseReune) {
+    private void handleJsonProcessingException(JsonProcessingException e, ResponseReune responseReune) {
         String errorMessage = "Error de procesamiento JSON: " + e.getMessage();
     	logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
         responseReune.getConsultas().clear();

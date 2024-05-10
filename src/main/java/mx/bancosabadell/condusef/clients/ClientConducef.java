@@ -4,10 +4,12 @@ package mx.bancosabadell.condusef.clients;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mx.bancosabadell.condusef.Condusef;
 import mx.bancosabadell.condusef.config.ConfigConstants;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
@@ -27,17 +29,31 @@ public abstract class ClientConducef {
 
     protected String pathReune = ConfigConstants.URL_API_REUNE;
     
-    private final OkHttpClient clientCondusef;
+    private OkHttpClient clientCondusef;
 
     public ClientConducef(){
         logger.info("Se crea el cliente de condusef");
-        logger.info("Proxy: " + ConfigConstants.PROXY_MX_BSAB_HOST + ":" + ConfigConstants.PROXY_MX_BSAB_PORT);
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ConfigConstants.PROXY_MX_BSAB_HOST, Integer.parseInt(ConfigConstants.PROXY_MX_BSAB_PORT)));
+        
+        Properties properties= new Properties();
+    	try {
+        	ClassLoader loader = Condusef.class.getClassLoader();
+        	properties.load(loader.getResourceAsStream("configSystem.properties"));
+        	
+            String PROXY_MX_BSAB_HOST = properties.getProperty("mx.bancosabadell.condusef.proxy.host");
+            String PROXY_MX_BSAB_PORT = properties.getProperty("mx.bancosabadell.condusef.proxy.port");
 
-        clientCondusef = new OkHttpClient.Builder()
-                .proxy(proxy)
-                .build();
-    }
+            logger.info("Proxy: " + PROXY_MX_BSAB_HOST + ":" + PROXY_MX_BSAB_PORT);
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_MX_BSAB_HOST, Integer.parseInt(PROXY_MX_BSAB_PORT)));
+
+            clientCondusef = new OkHttpClient.Builder()
+                    .proxy(proxy)
+                    .build();
+    	}catch(IOException e) {
+    		e.printStackTrace();
+            clientCondusef = new OkHttpClient.Builder()
+                    .build();
+    	}
+   }
 
     //Metodos http get via OkHttp para la comunicacion con conseft
     public String get(String url, String token) throws Exception {

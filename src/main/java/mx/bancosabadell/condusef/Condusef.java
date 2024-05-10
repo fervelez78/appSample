@@ -3,6 +3,7 @@ package mx.bancosabadell.condusef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -197,6 +198,8 @@ public class Condusef{
     			logger.error(ex.getMessage());
     		}
 
+        }catch(FileNotFoundException e) {
+        	logger.error("Error: " + e.getMessage());
         }catch(Exception e) {
         	String error = "Error inesperado: " + e.getMessage();
         	e.printStackTrace();
@@ -278,6 +281,8 @@ public class Condusef{
     			logger.error(ex.getMessage());
     		}
 
+        }catch(FileNotFoundException e) {
+        	logger.error("Error: " + e.getMessage());
         }catch(Exception e) {
         	String error = "Error inesperado: " + e.getMessage();
         	e.printStackTrace();

@@ -1,7 +1,9 @@
 package mx.bancosabadell.condusef.config;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import mx.bancosabadell.condusef.Condusef;
@@ -33,30 +35,33 @@ public class ConfigConstants {
     public static String REG_EXP_QUEJAS_REDECO;
     public static String REG_EXP_QUEJAS_REUNE;
 
-    public static String PROXY_MX_BSAB_HOST;
-    public static String PROXY_MX_BSAB_PORT;
-
 
     static {
         Properties prop = new Properties();
-        Properties properties = new Properties();
+        //Properties properties = new Properties();
 
         /* InputStream input = new FileInputStream(URL_CONFIG_FILE) */                  
         try {
         	// InputStream input = ConfigConstants.class.getClassLoader().getResourceAsStream("C:\\Indra\\rep_condusef\\bin\\config.properties")) {
         	
-            ClassLoader loader = Condusef.class.getClassLoader();
+            //ClassLoader loader = Condusef.class.getClassLoader();
             
 
-        	properties.load(loader.getResourceAsStream("configSystem.properties"));
-        	prop.load(loader.getResourceAsStream("config.properties"));
-        	
-        } catch(IOException ex){
+        	//properties.load(loader.getResourceAsStream("configSystem.properties"));
+        	//prop.load(loader.getResourceAsStream("config.properties"));
+        	//InputStream inputStream = ConfigConstants.class.getClassLoader().getResourceAsStream("C:/Indra/rep_condusef/bin/config.properties");
+        	InputStream inputStream  = new FileInputStream("./config.properties");
+            
+        	prop.load(inputStream);
+        } catch(FileNotFoundException ex){
+        	ex.printStackTrace();
             throw new IllegalStateException("Error al cargar el archivo de configuración", ex);
-        }
+        } catch (IOException e) {
+        	e.printStackTrace();
+			// TODO Auto-generated catch block
+        	throw new IllegalStateException("Error al cargar el archivo de configuración", e);
+		}
         
-        PROXY_MX_BSAB_HOST = properties.getProperty("mx.bancosabadell.condusef.proxy.host");
-        PROXY_MX_BSAB_PORT = properties.getProperty("mx.bancosabadell.condusef.proxy.port");
         
         DIR_NAS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.base");
         DIR_NAS_LOGS = prop.getProperty("mx.bancosabadel.dir_nas.url.directories.url_logs");

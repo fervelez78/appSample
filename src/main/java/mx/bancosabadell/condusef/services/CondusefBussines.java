@@ -3,6 +3,7 @@ package mx.bancosabadell.condusef.services;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -647,7 +648,8 @@ public class CondusefBussines {
         		loggerRedeco.error(error);
         	if (pathNasDirectoriReuneOrRedeco == pathReune)
         		loggerReune.error(error);
-            throw new Exception(error);
+            throw new FileNotFoundException(error);
+        	
         }
 
     }
