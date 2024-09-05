@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property file="config.properties"/>
+	
+    <variable scope="context" name="url_logs" value="${mx.bancosabadel.dir_nas.url.directories.url_logs}" />
+    <variable scope="context" name="url_base" value="${mx.bancosabadel.dir_nas.url.directories.base}" />
+    <variable scope="context" name="url_redeco" value="${mx.bancosabadel.dir_nas.url.directories.url_redeco}" />
+    <variable scope="context" name="url_reune" value="${mx.bancosabadel.dir_nas.url.directories.url_reune}" />
+    
+    <timestamp key="byDate" datePattern="yyyy-MM-dd"/>
+    
+    <!-- Appender para ClientReune -->
+    <appender name="ClientReune" class="ch.qos.logback.core.FileAppender">
+        <file>${url_base}${url_reune}logs/reune-log-${byDate}.log</file>
+        <encoder>
+            <pattern>%date %level [Proceso REUNE]  %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para ClientRedeco -->
+    <appender name="ClientRedeco" class="ch.qos.logback.core.FileAppender">
+        <file>${url_base}${url_redeco}logs/redeco-log-${byDate}.log</file>
+        <encoder>
+            <pattern>%date %level [Proceso REDECO] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+     <appender name="Condusef" class="ch.qos.logback.core.FileAppender">
+        <file>${url_base}${url_logs}condusef-log-${byDate}.log</file>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Loggers específicos para cada cliente -->
+    <logger name="clientReuneLogger" level="info" additivity="false">
+        <appender-ref ref="ClientReune"/>
+        <appender-ref ref="Condusef"/>
+    </logger>
+
+    <logger name="clientRedecoLogger" level="info" additivity="false">
+        <appender-ref ref="ClientRedeco"/>
+        <appender-ref ref="Condusef"/>
+    </logger>
+
+    <logger name="condusefLogger" level="info" additivity="false">
+        <appender-ref ref="Condusef"/>
+    </logger>
+
+    <root level="error">
+        <appender-ref ref="ClientReune"/>
+        <appender-ref ref="ClientRedeco"/>
+        <appender-ref ref="Condusef"/>
+    </root>
+
+</configuration>
+
