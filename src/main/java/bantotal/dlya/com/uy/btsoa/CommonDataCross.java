@@ -1,10 +1,7 @@
 
 package bantotal.dlya.com.uy.btsoa;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -28,9 +25,19 @@ import mx.bancosabadell.condusef.Condusef;
 public class CommonDataCross
     extends Service
 {
-
+	/**
+	 * COMMONDATACROSS_WSDL_LOCATION property.
+	 */
     private final static URL COMMONDATACROSS_WSDL_LOCATION;
+    
+    /**
+     * COMMONDATACROSS_EXCEPTION property.
+     */
     private final static WebServiceException COMMONDATACROSS_EXCEPTION;
+    
+    /**
+     * COMMONDATACROSS_QNAME property.
+     */
     private final static QName COMMONDATACROSS_QNAME = new QName("http://uy.com.dlya.bantotal/BTSOA/", "CommonDataCross");
 
     static {
@@ -55,34 +62,61 @@ public class CommonDataCross
         COMMONDATACROSS_EXCEPTION = e;
     }
 
+    /**
+     * Generic constructor. 
+     */
     public CommonDataCross() {
         super(__getWsdlLocation(), COMMONDATACROSS_QNAME);
     }
 
+    /**
+     * Constructor with features.
+     * @param features List of features.
+     */
     public CommonDataCross(WebServiceFeature... features) {
         super(__getWsdlLocation(), COMMONDATACROSS_QNAME, features);
     }
 
+    /**
+     * Constructor with WSDL location.
+     * @param wsdlLocation URL of WSDL location.
+     */
     public CommonDataCross(URL wsdlLocation) {
         super(wsdlLocation, COMMONDATACROSS_QNAME);
     }
 
+    /**
+     * Constructor with WSDL location and features.
+     * @param wsdlLocation URL of WSDL location.
+     * @param features List of features.
+     */
     public CommonDataCross(URL wsdlLocation, WebServiceFeature... features) {
         super(wsdlLocation, COMMONDATACROSS_QNAME, features);
     }
-
+    
+    /**
+     * Constructor with WSDL location and service name. 
+     * @param wsdlLocation URL of WSDL location.
+     * @param serviceName Service name.
+     */
     public CommonDataCross(URL wsdlLocation, QName serviceName) {
         super(wsdlLocation, serviceName);
     }
 
+    /**
+     * Constructor with WSDL location, service name and features.
+     * @param wsdlLocation URL of WSDL location.
+     * @param serviceName Service name.
+     * @param features List of features.
+     */
     public CommonDataCross(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
         super(wsdlLocation, serviceName, features);
     }
 
     /**
-     * 
+     * Method for get the SOAP port.
      * @return
-     *     returns CommonDataCrossSoapPort
+     *     returns CommonDataCrossSoapPort SOAP port.
      */
     @WebEndpoint(name = "CommonDataCrossSoapPort")
     public CommonDataCrossSoapPort getCommonDataCrossSoapPort() {
@@ -90,17 +124,21 @@ public class CommonDataCross
     }
 
     /**
-     * 
+     * Method for get the SOAP port with feature.
      * @param features
      *     A list of {@link javax.xml.ws.WebServiceFeature} to configure on the proxy.  Supported features not in the <code>features</code> parameter will have their default values.
      * @return
-     *     returns CommonDataCrossSoapPort
+     *     returns CommonDataCrossSoapPort SOAP port.
      */
     @WebEndpoint(name = "CommonDataCrossSoapPort")
     public CommonDataCrossSoapPort getCommonDataCrossSoapPort(WebServiceFeature... features) {
         return super.getPort(new QName("http://uy.com.dlya.bantotal/BTSOA/", "CommonDataCrossSoapPort"), CommonDataCrossSoapPort.class, features);
     }
 
+    /**
+     * Method for get WSD location.
+     * @return WSDL location.
+     */
     private static URL __getWsdlLocation() {
         if (COMMONDATACROSS_EXCEPTION!= null) {
             throw COMMONDATACROSS_EXCEPTION;

@@ -24,7 +24,7 @@ public interface AuthenticateSoapPort {
 
 
     /**
-     * 
+     * Método para ejecutar el servicio de autenticación.
      * @param parameters
      * @return
      *     returns bantotal.dlya.com.uy.btsoa.AuthenticateExecuteResponse

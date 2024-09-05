@@ -1,5 +1,8 @@
 package mx.bancosabadell.condusef.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import bantotal.dlya.com.uy.btsoa.Authenticate;
 import bantotal.dlya.com.uy.btsoa.AuthenticateExecute;
 import bantotal.dlya.com.uy.btsoa.AuthenticateExecuteResponse;
@@ -14,52 +17,69 @@ import bantotal.dlya.com.uy.btsoa.SBTInReq;
 
 public class LatiniaMailService extends MailService {
 	
+    /**
+     * Logger general de Condusef.
+     */
+	private static final Logger logger = LoggerFactory.getLogger("condusefLogger");
+
+	/**
+	 * Método para generar el token de autenticación para el uso del servicio del correo. 
+	 * @return Token generado.
+	 * @throws Exception Error generado en caso de fallar el consumo del servicio.
+	 */
 	public AuthenticateExecuteResponse getToken() throws Exception {
 
         AuthenticateExecuteResponse responseToken;
 
-            Authenticate ws = new Authenticate();
+        Authenticate ws = new Authenticate();
 
-            AuthenticateSoapPort wsPort = ws.getAuthenticateSoapPort();
-            System.out.println("  wsPort: " + wsPort.toString());
-            AuthenticateExecute wsRequest = new AuthenticateExecute();
-            
-            SBTInReq bSbtInReq = new SBTInReq();
+        AuthenticateSoapPort wsPort = ws.getAuthenticateSoapPort();
+        logger.info("  wsPort: " + wsPort.toString());
+        AuthenticateExecute wsRequest = new AuthenticateExecute();
+        
+        SBTInReq bSbtInReq = new SBTInReq();
 
-            bSbtInReq.setCanal("Movil");
-            bSbtInReq.setRequerimiento("1");
-            bSbtInReq.setUsuario("SVC_S_BTSERV");
-            bSbtInReq.setDevice("1");
-            System.out.println("  bSbtInReq: " + bSbtInReq.toString());
+        bSbtInReq.setCanal("Movil");
+        bSbtInReq.setRequerimiento("1");
+        bSbtInReq.setUsuario("SVC_S_BTSERV");
+        bSbtInReq.setDevice("1");
+        logger.info("  bSbtInReq: " + bSbtInReq.toString());
 
-            wsRequest.setUserId("SVC_S_BTSERV");
-            wsRequest.setUserPassword("SVC_S_BTSERV");
-            wsRequest.setBtinreq(bSbtInReq);
-            System.out.println("  wsRequest: " + wsRequest.toString());
-            System.out.println("  wsRequest.getUserId(): " + wsRequest.getUserId());
-            System.out.println("  wsRequest.getUserPassword(): " + wsRequest.getUserPassword());
-            
-            responseToken = wsPort.execute(wsRequest);
-            
-            if (responseToken == null)
-            	throw new Exception("Error al tratar de generar el token");
-            else if (responseToken.getErroresnegocio()!= null && 
-            		responseToken.getErroresnegocio().getBTErrorNegocio().size() > 0) {
-            	for (SBTErrorNegocio error: responseToken.getErroresnegocio().getBTErrorNegocio()) {
-            		System.out.println("Error: " + error.getCodigo() + error.getDescripcion());
-            	}
-            }else if (responseToken.getSessionToken() == null) {
-            	throw new Exception("Error al obtener el token");
-            }
-            
+        wsRequest.setUserId("SVC_S_BTSERV");
+        wsRequest.setUserPassword("SVC_S_BTSERV");
+        wsRequest.setBtinreq(bSbtInReq);
+        logger.info("  wsRequest: " + wsRequest.toString());
+        logger.info("  wsRequest.getUserId(): " + wsRequest.getUserId());
+        logger.info("  wsRequest.getUserPassword(): " + wsRequest.getUserPassword());
+        
+        responseToken = wsPort.execute(wsRequest);
+        
+        if (responseToken == null)
+        	throw new Exception("Error al tratar de generar el token");
+        else if (responseToken.getErroresnegocio()!= null && 
+        		responseToken.getErroresnegocio().getBTErrorNegocio().size() > 0) {
+        	for (SBTErrorNegocio error: responseToken.getErroresnegocio().getBTErrorNegocio()) {
+        		logger.info("Error: " + error.getCodigo() + error.getDescripcion());
+        	}
+        }else if (responseToken.getSessionToken() == null) {
+        	throw new Exception("Error al obtener el token");
+        }
+        
 
-            System.out.println("Sesion Token: " + responseToken.getSessionToken());
-            return responseToken;
+        logger.info("Sesion Token: " + responseToken.getSessionToken());
+        return responseToken;
     }
 
+	/**
+	 * Envío del correo al servicio de latinia.
+	 * @param to Destinatario del correo. 
+	 * @param subject Asunto del correo.
+	 * @param message Mensaje del correo.
+	 * @return Verdadero si se envía correctamente.
+	 */
 	@Override
 	public boolean send(String to, String subject, String message) {
-		// TODO Auto-generated method stub
+		// Inicia el envío del correo.
 		CommonDataCross ws = new CommonDataCross();
 
         CommonDataCrossSoapPort wsPort = ws.getCommonDataCrossSoapPort();
@@ -98,8 +118,11 @@ public class LatiniaMailService extends MailService {
 	
 	        return response.getSuccess().equals("success");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
+			for (StackTraceElement trace: e.getStackTrace()) {
+        		logger.error(e.getMessage());
+        		logger.error(trace.toString());
+        	}
 			return false;
 		}
 	}

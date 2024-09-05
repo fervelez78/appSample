@@ -38,10 +38,21 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "Authenticate.Execute")
 public class AuthenticateExecute {
 
+	/**
+	 * btinreq property.
+	 */
     @XmlElement(name = "Btinreq", required = true)
     protected SBTInReq btinreq;
+    
+    /**
+     * userId property.
+     */
     @XmlElement(name = "UserId", required = true)
     protected String userId;
+    
+    /**
+     * userPassword property.
+     */
     @XmlElement(name = "UserPassword", required = true)
     protected String userPassword;
 

@@ -141,9 +141,25 @@
 	    <version>4.0.1.RELEASE</version>
 	</dependency>
      
-  </dependencies>
+	<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
+	<dependency>
+	    <groupId>javax.mail</groupId>
+	    <artifactId>mail</artifactId>
+	    <version>1.4.7</version>
+	</dependency>
 
+  </dependencies>
   <profiles>
+		<profile>
+            <id>local</id>
+            
+            <properties>
+                <mx.bancosabadell.condusef.url.authenticate>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_Authenticate?wsdl</mx.bancosabadell.condusef.url.authenticate>
+                <mx.bancosabadell.condusef.url.commonDataCross>http://es9tc06bsab.mx.bsab:17153/sabadell/servlet/com.dlya.bantotal.odwsbt_CommonDataCross_v1?wsdl</mx.bancosabadell.condusef.url.commonDataCross>
+                <mx.bancosabadell.condusef.proxy.host></mx.bancosabadell.condusef.proxy.host>
+                <mx.bancosabadell.condusef.proxy.port></mx.bancosabadell.condusef.proxy.port>
+            </properties>
+        </profile>
 		<profile>
             <id>pre</id>
             

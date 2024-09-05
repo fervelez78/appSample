@@ -10,7 +10,7 @@ import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 @Data
 public class ResponseRedeco {
 
-	@JsonProperty("Número total de envíos")
+	@JsonProperty("Número total de envios")
 	private Integer numeroTotalDeEnvios;
 
 	private List<Object> addedRows;
@@ -22,7 +22,12 @@ public class ResponseRedeco {
 	private List<Queja> quejas;
     
 	private String error;
+	
+	private String message;
     
 	private List<String> errores;
+	
+	@JsonProperty("Quejas enviadas")
+	private List<String> quejasEnviadas;
     
 }

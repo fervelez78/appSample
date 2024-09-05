@@ -8,7 +8,6 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
@@ -18,36 +17,40 @@ import lombok.Data;
 
 @Data
 public class Queja {
+	@Size( min=1, max = 400, message = "El numero máximo de caracteres de la denominación debe ser 400")
+	private String quejasDenominacion;
+	
+	@Size( min=1, max = 200, message = "El numero máximo de caracteres del sector debe ser 200")
+	private String quejasSector;
 
-    @Max(value = 12, message = "QuejasNoTrim debe ser menor o igual a 12")
-    private Integer quejasNoTrim;
+	@Max(value = 12, message = "El numero de mes debe ser menor o igual a 12")
+    private Integer quejasNoMes;
     
     @Digits(integer = 1, fraction = 0, message = "La longitud maxima de QuejasNum debe ser de 1")
     private Integer quejasNum;
 
-    @NotBlank(message = "quejasFolio no puede estar vacío")
+    @NotBlank(message = "Folio no puede estar vacío")
     private String quejasFolio;
 
-    @NotNull(message = "quejasFecRecepcion no puede ser nulo")
     private String quejasFecRecepcion;
 
-    @Positive(message = "medioId debe ser un número positivo")
+    @Positive(message = "Medio debe ser un número positivo")
     @Digits(integer = 2, fraction = 0, message = "La longitud maxima de medioId debe ser de 2")
-    private Integer medioId;
+    private Integer quejasMedio;
 
-    @Positive(message = "nivelATId debe ser un número positivo")
+    @Positive(message = "Nivel de atención debe ser un número positivo")
     @Digits(integer = 2, fraction = 0, message = "La longitud maxima de nivelATId debe ser de 2")
-    private Integer nivelATId;
+    private Integer quejasNivelAT;
 
-    @NotBlank(message = "product no puede estar vacío")
+    @NotBlank(message = "Producto no puede estar vacío")
     @Size( min=12, max = 12, message = "El numero de caracteres de product debe ser de máximo 12")
-    private String product;
+    private String quejasProducto;
 
-    @NotBlank(message = "causasId no puede estar vacío")
+    @NotBlank(message = "Causa no puede estar vacío")
     @Size( min=1, max = 4, message = "El numero de caracteres de causasId debe ser de máximo 4 ")
-    private String causasId;
+    private String quejasCausa;
 
-    @NotBlank(message = "quejasPORI no puede estar vacío")
+    @NotBlank(message = "PORI no puede estar vacío")
     @Pattern(regexp = "^(SI|NO)$", message = "quejasPORI debe ser 'SI' o 'NO' (mayúsculas)")
     private String quejasPORI;
 
@@ -55,7 +58,7 @@ public class Queja {
 
     @Min(value = 1, message = "estadosId debe ser mayor o igual a 1")
     @Digits(integer = 2, fraction = 0, message = "La longitud maxima de estadosId debe ser de 2")
-    private Integer estadosId;
+    private Integer quejasEstados;
 
     @Min(value = 1, message = "quejasMunId debe ser mayor o igual a 1")
     @Digits(integer = 8, fraction = 0, message = "La longitud maxima de estadosId debe ser de 8")
@@ -96,25 +99,33 @@ public class Queja {
     @Digits(integer = 4, fraction = 0, message = "La longitud maxima de quejasNumPenal debe ser de 4")
     private Integer quejasNumPenal;
     
-    private int penalizacionId;
+    private Integer quejasPenalizacion;
 
     public Queja(
-            Integer quejasNoTrim, Integer quejasNum, String quejasFolio, String quejasFecRecepcion, Integer medioId,
-            Integer nivelATId, String product, String causasId, String quejasPORI, Integer quejasEstatus, Integer estadosId,
-            Integer quejasMunId, Integer quejasLocId, Integer quejasColId, Integer quejasCP, Integer quejasTipoPersona,
-            String quejasSexo, Integer quejasEdad, String quejasFecResolucion, String quejasFecNotificacion,
-            Integer quejasRespuesta, Integer quejasNumPenal, Integer penalizacionId) {
-        this.quejasNoTrim = quejasNoTrim;
+            String quejasDenominacion, String quejasSector,
+    		Integer quejasNoTrim, Integer quejasNum, 
+    		String quejasFolio, String quejasFecRecepcion, Integer quejasMedio,
+            Integer quejasNivelAT, String quejasProduct, String quejasCausa, 
+            String quejasPORI, Integer quejasEstatus, Integer quejasEstados,
+            Integer quejasMunId, Integer quejasLocId, Integer quejasColId, 
+            Integer quejasCP, Integer quejasTipoPersona, String quejasSexo, 
+            Integer quejasEdad, String quejasFecResolucion, String quejasFecNotificacion,
+            Integer quejasRespuesta, Integer quejasNumPenal, Integer quejasPenalizacion) {
+        
+    	//
+    	this.quejasDenominacion = quejasDenominacion;
+        this.quejasSector = quejasSector;
+    	this.quejasNoMes = quejasNoTrim;
         this.quejasNum = quejasNum;
         this.quejasFolio = quejasFolio;
         this.quejasFecRecepcion = quejasFecRecepcion;
-        this.medioId = medioId;
-        this.nivelATId = nivelATId;
-        this.product = product;
-        this.causasId = causasId;
+        this.quejasMedio = quejasMedio;
+        this.quejasNivelAT = quejasNivelAT;
+        this.quejasProducto = quejasProduct;
+        this.quejasCausa = quejasCausa;
         this.quejasPORI = quejasPORI;
         this.quejasEstatus = quejasEstatus;
-        this.estadosId = estadosId;
+        this.quejasEstados = quejasEstados;
         this.quejasMunId = quejasMunId;
         this.quejasLocId = quejasLocId;
         this.quejasColId = quejasColId;
@@ -126,7 +137,7 @@ public class Queja {
         this.quejasFecNotificacion = quejasFecNotificacion;
         this.quejasRespuesta = quejasRespuesta;
         this.quejasNumPenal = quejasNumPenal;
-        this.penalizacionId = penalizacionId;
+        this.quejasPenalizacion = quejasPenalizacion;
     }
 
     public Queja() {

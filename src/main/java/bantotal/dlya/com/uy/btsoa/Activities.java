@@ -34,6 +34,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Activities {
 
+	/**
+	 * Lista de actividades.
+	 */
     @XmlElement(name = "sBSActivity")
     protected List<SBSActivity> sbsActivity;
 

@@ -8,13 +8,13 @@ import lombok.Data;
 public class QuejasData {
 
     @CsvBindByName(column = "Denominación o razón social")
-    private String razonSocial;
+    private String quejasDenominacion;
     
     @CsvBindByName(column = "Denominación o razón social")
-    private String sector;
+    private String quejasSector;
 
     @CsvBindByName(column = "Mes a informar")
-    private String quejasNoTrim;
+    private String quejasNoMes;
 
     @CsvBindByName(column = "Número de quejas")
     private String quejasNum;
@@ -26,16 +26,16 @@ public class QuejasData {
     private String quejasFecRecepcion;
 
     @CsvBindByName(column = "Medio de recepción o canal")
-    private String medioId;
+    private String quejasMedio;
 
     @CsvBindByName(column = "Nivel de atención o contacto")
-    private String nivelATId;
+    private String quejasNivelAT;
 
     @CsvBindByName(column = "Producto y/o Servicio")
-    private String product;
+    private String quejasProducto;
 
     @CsvBindByName(column = "Causa de la queja")
-    private String causasId;
+    private String quejasCausa;
 
     @CsvBindByName(column = "PORI")
     private String quejasPORI;
@@ -44,7 +44,7 @@ public class QuejasData {
     private String quejasEstatus;
 
     @CsvBindByName(column = "Entidad Federativa")
-    private String estadosId;
+    private String quejasEstados;
 
     @CsvBindByName(column = "Municipio o Alcaldía")
     private String quejasMunId;
@@ -80,6 +80,6 @@ public class QuejasData {
     private String quejasNumPenal;
 
     @CsvBindByName(column = " Tipo de penalización")
-    private String penalizacionId;
+    private String quejasPenalizacion;
 
 }

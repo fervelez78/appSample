@@ -6,25 +6,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -35,7 +21,7 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.slf4j.Logger;
+import org.slf4j.Logger; 
 import org.slf4j.LoggerFactory;
 
 import com.opencsv.bean.CsvToBean;
@@ -50,82 +36,69 @@ import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.models.ResponseReune;
 
+/**
+ * Clase para establecer el negocio de Condusef.
+ */
 public class CondusefBussines {
     
+	/**
+	 * Logger de REDECO.
+	 */
     private static final Logger loggerRedeco = LoggerFactory.getLogger("clientRedecoLogger");
+    
+    /**
+     * Logger de REUNE.
+     */
     private static final Logger loggerReune = LoggerFactory.getLogger("clientReuneLogger");
     
-    public String urlNas = ConfigConstants.DIR_NAS;
+    /**
+     * Recupera el directorio NAS.
+     */
+    public String urlNas = ConfigConstants.getDirNas();
 
-    public String pathRedeco = ConfigConstants.DIR_NAS_REDECO;
-    public String pathReune = ConfigConstants.DIR_NAS_REUNE;
+    /**
+     * Recupera el directorio REDECO.
+     */
+    public String pathRedeco = ConfigConstants.getDirNasRedeco();
     
-    public String urlNasLog = ConfigConstants.DIR_NAS_LOGS;
+    /**
+     * Recupera el directorio REUNE.
+     */
+    public String pathReune = ConfigConstants.getDirNasReune();
     
-    public String urlHistorico = ConfigConstants.DIR_NAS_HISTORICO;
+    /**
+     * Recupera el directorio para los logs.
+     */
+    public String urlNasLog = ConfigConstants.getDirNasLog();
+    
+    /**
+     * Recupera el directorio del histórico.
+     */
+    public String urlHistorico = ConfigConstants.getDirNasHistorico();
+    
+    /**
+     * Lista de archivos procesados
+     */				
+    public static List<File> archivosProcesados = new ArrayList<File>();
 
-    /*
-    public Queja mapperDocumentQuejaDummi(String folio){
-        
-        loggerRedeco.info("Inicio: Se convierte el documento a queja");
-        parseDocumentToBen();
-        //! Asignacion de valiable dummi
-        String fechaString = "10/01/2024";        
-       
-        Integer quejasNoTrim = 1 ; 
-        Integer quejasNum = 1;
-        String quejasFolio = folio;//F0001
-        String quejasFecRecepcion = fechaString;
-        Integer medioId = 1;
-        Integer nivelATId = 2;
-        String product = "0269118912722";
-        String causasId = "C001";
-        String quejasPORI = "SI";
-        Integer quejasEstatus = 1;
-        Integer estadosId = 9 ;
-        Integer quejasMunId = 12345678;
-        Integer quejasLocId = 12345678;
-        Integer quejasColId = 12345678;
-        Integer quejasCP = 1234;
-        Integer quejasTipoPersona = 1;
-        String quejasSexo = "H";
-        Integer quejasEdad = 30;
-        String quejasFecResolucion =  fechaString;
-        String quejasFecNotificacion =  fechaString;
-        Integer quejasRespuesta = null;
-        Integer quejasNumPenal = 0 ;
-        Integer penalizacionId = 5;
-
-        Queja queja = null;
-          
-        queja = new Queja(
-            quejasNoTrim,
-            quejasNum,
-            quejasFolio,
-            quejasFecRecepcion,
-            medioId,
-            nivelATId,
-            product,
-            causasId,
-            quejasPORI,
-            quejasEstatus,
-            estadosId,
-            quejasMunId,
-            quejasLocId,
-            quejasColId,
-            quejasCP,
-            quejasTipoPersona,
-            quejasSexo,
-            quejasEdad,
-            quejasFecResolucion,
-            quejasFecNotificacion,
-            quejasRespuesta,
-            quejasNumPenal,
-            penalizacionId
-        );
-        return validateQueja(queja);        
-    } */
-        
+    /**
+     * Nombre de la razón social que ejecuta el proceso
+     */
+    private String razonSocial;    
+    
+    /**
+     * Constructor por defecto de la clase.
+     * @param razonSocial razón social que ejecuta el proceso
+     */
+    public CondusefBussines(String razonSocial) {
+    	setRazonSocial(razonSocial);
+    }
+    
+    /**
+     * Método para el mapeo de una lista quejasData a un ResponseRedeco.        
+     * @param quejasDataList Lista de quejas recuperada de un archivo.
+     * @return Estructura para el response de REDECO.
+     */
     public ResponseRedeco mapperDocumentQueja(List<QuejasData> quejasDataList){
         
     	ResponseRedeco responseRedeco = new ResponseRedeco();
@@ -135,29 +108,30 @@ public class CondusefBussines {
         try {
             for (QuejasData quejasData : quejasDataList) {            
                 Queja queja = new Queja();
-                queja.setQuejasNoTrim(Integer.parseInt(quejasData.getQuejasNoTrim())); // Mayo
+                queja.setQuejasDenominacion(quejasData.getQuejasDenominacion());
+                queja.setQuejasSector(quejasData.getQuejasSector());
+                queja.setQuejasNoMes(Integer.parseInt(quejasData.getQuejasNoMes())); // Mayo
                 queja.setQuejasNum(Integer.parseInt(quejasData.getQuejasNum()));
                 queja.setQuejasFolio(quejasData.getQuejasFolio());
                 queja.setQuejasFecRecepcion(quejasData.getQuejasFecRecepcion()); // Usar la fecha
-                queja.setMedioId(Integer.parseInt(quejasData.getMedioId()));
-                queja.setNivelATId(Integer.parseInt(quejasData.getNivelATId()));
-                queja.setProduct(quejasData.getProduct());
-                queja.setCausasId(quejasData.getCausasId());
+                queja.setQuejasMedio(Integer.parseInt(quejasData.getQuejasMedio()));
+                queja.setQuejasNivelAT(Integer.parseInt(quejasData.getQuejasNivelAT()));
+                queja.setQuejasProducto(quejasData.getQuejasProducto());
+                queja.setQuejasCausa(quejasData.getQuejasCausa());
                 queja.setQuejasPORI(quejasData.getQuejasPORI());
                 queja.setQuejasEstatus(Integer.parseInt(quejasData.getQuejasEstatus())); // Pendiente
-                queja.setEstadosId(Integer.parseInt(quejasData.getEstadosId())); // Ejemplo de entidad federativa
+                queja.setQuejasEstados(Integer.parseInt(quejasData.getQuejasEstados())); // Ejemplo de entidad federativa
                 queja.setQuejasMunId(Integer.parseInt(quejasData.getQuejasMunId()));
                 queja.setQuejasLocId(Integer.parseInt(quejasData.getQuejasLocId()));
                 queja.setQuejasColId(Integer.parseInt(quejasData.getQuejasColId()));
                 queja.setQuejasCP(Integer.parseInt(quejasData.getQuejasCP()));
                 queja.setQuejasTipoPersona(Integer.parseInt(quejasData.getQuejasTipoPersona())); // Persona Física
-                queja.setQuejasSexo(quejasData.getQuejasSexo());
-                queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
-                queja.setQuejasFecResolucion(quejasData.getQuejasFecResolucion()); // Usar la fecha 
-                queja.setQuejasFecNotificacion(quejasData.getQuejasFecNotificacion()); // Usar la fecha 
-                queja.setQuejasRespuesta(Integer.parseInt(quejasData.getQuejasRespuesta())); // Nulo ya que está pendiente
-                queja.setQuejasNumPenal(Integer.parseInt(quejasData.getQuejasNumPenal()));
-                queja.setPenalizacionId(Integer.parseInt(quejasData.getPenalizacionId()));
+                // El sexo y edad solo aplica pra persona física
+                if (queja.getQuejasTipoPersona() != 2) { 
+	                queja.setQuejasSexo(quejasData.getQuejasSexo());
+	                queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
+                }
+                
                 loggerRedeco.info("Cargado queja " + queja.getQuejasFolio());
                 responseRedeco = validateQueja(queja, responseRedeco, listInfoValidate, quejaList);  
             }
@@ -168,6 +142,11 @@ public class CondusefBussines {
         return responseRedeco;
     }
 
+    /**
+     * Método para el mapeo de una lista ConsultaData a un ResponseReune.
+     * @param consultaDataList Lista de consultas leidas de un archivo.
+     * @return Estrucutra ResponseReune
+     */
     public ResponseReune mapperDocumentConsulta(List<ConsultaData> consultaDataList) {
         ResponseReune responseReune = new ResponseReune();
         List<InfoValidate> listInfoValidate = new ArrayList<>();
@@ -198,7 +177,7 @@ public class CondusefBussines {
                 // Validar la consulta antes de agregarla a la lista
                 loggerReune.info("Cargando consulta " + consulta.getConsultasFolio());
                 responseReune = validateConsulta(consulta, responseReune, listInfoValidate, consultaList);
-                consultaList.add(consulta);
+                //consultaList.add(consulta);
 
             }
         } catch (Exception e) {
@@ -208,6 +187,11 @@ public class CondusefBussines {
         return responseReune;
     }
 
+    /**
+     * Método para generar un error en la lectura de archivo.
+     * @param e Excepción generada.
+     * @param responseRedeco Resultado del servicio REDECO.
+     */
     private void handleUnexpectedException(Exception e, ResponseRedeco responseRedeco) {
         String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE REDECO.xlsx";
         loggerRedeco.error(errorMessage);
@@ -215,6 +199,12 @@ public class CondusefBussines {
         responseRedeco.setQuejas(quejas);
         responseRedeco.setError(errorMessage);
     }
+    
+    /**
+     * Método para generar un error en la lectura de archivo.
+     * @param e Excepción generada.
+     * @param responseReune Resultado del servicio REUNE.
+     */
     private void handleUnexpectedException(Exception e, ResponseReune responseReune) {
         String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE_REUNE.xlsx";
         loggerReune.error(errorMessage);
@@ -223,6 +213,14 @@ public class CondusefBussines {
         responseReune.setError(errorMessage);
     }
 
+    /**
+     * Método para la validación de un registro de quejas.
+     * @param queja Queja generada.
+     * @param responseRedeco Respuesta del servicio de REDECO.
+     * @param listInfoValidate Lista de información con las validaciones.
+     * @param quejaList Lista de quejas.
+     * @return Respuesta de REDECO.
+     */
     public ResponseRedeco validateQueja(Queja queja, ResponseRedeco responseRedeco,  List<InfoValidate> listInfoValidate, List<Queja> quejaList){
         
         try{ 
@@ -261,6 +259,14 @@ public class CondusefBussines {
        return responseRedeco;
     }
     
+    /**
+     * Método para la validación de un registro de consulta.
+     * @param consulta Consulta a validar.
+     * @param responseReune Respuesta del servicio REUNE.
+     * @param listInfoValidate Lista de validaciones.
+     * @param consultaList Lista de consultas.
+     * @return Respuesta de REUNE.
+     */
     public ResponseReune validateConsulta(Consulta consulta, ResponseReune responseReune, List<InfoValidate> listInfoValidate, List<Consulta> consultaList) {
         try {
             ValidatorFactory validatorFactory = Validation.byDefaultProvider()
@@ -295,6 +301,12 @@ public class CondusefBussines {
     
         return responseReune;
     }
+    
+    /**
+     * Lectura de un archivo XLS de Quejas para la API de REDECO.
+     * @return Lista de quejas obtenida.
+     * @throws Exception Excepción generada en caso de error al leer el archivo.
+     */
     public List<QuejasData> parseDocumentToBen() throws Exception{
         //!Mejorar captura de exepciones
         //Se buscan los archivos .txt desde la carpeta dada el cual regresa una lista de archivos
@@ -315,14 +327,11 @@ public class CondusefBussines {
                         //Se extrae en una lista cada "fila" Queja, del CSV el cual se mapea con CsvToBean
                         quejasDataList = csvToBean.parse();
 
-                        /* // Ahora, quejasDataList contiene los objetos con los datos del CSV
-                        for (QuejasData quejasData : quejasDataList) {
-                            System.out.println(quejasData.toString());
-                        } */
-                        
                     } catch (IOException e) {
                     	loggerRedeco.error("Error: " + e.getMessage());
-                        e.printStackTrace();
+                    	for (StackTraceElement trace: e.getStackTrace()) {
+                    		loggerRedeco.error(trace.toString());
+                    	}
                     }
                 }
             }
@@ -335,6 +344,11 @@ public class CondusefBussines {
 
     }
 
+    /**
+     * Método para la lectura de un archivo xls a una lista de quejas.
+     * @return Lista de quejas.
+     * @throws Exception Excepción generada en la lectura del archivo.
+     */
     public List<QuejasData> parseDocumentToBenXlsx() throws Exception {
     	
     	List<File> archivosEnDirectorio = findDocument(pathRedeco);
@@ -351,43 +365,49 @@ public class CondusefBussines {
                         Sheet sheet = workbook.getSheetAt(0);
                         
                         for (Row row : sheet) {
-                            // Ignorar la primera fila si contiene encabezados
-                            if (row.getRowNum() == 0) continue;
-    
-                            QuejasData quejasData = new QuejasData();
-                            
-                            //!Corregir Mapeo   Cannot get a NUMERIC value from a STRING cell y orden de datos 
-                            quejasData.setQuejasNoTrim(String.valueOf((int) row.getCell(2).getNumericCellValue()));
-                            quejasData.setQuejasNum(String.valueOf((int) row.getCell(3).getNumericCellValue()));
-                            quejasData.setQuejasFolio(row.getCell(4).getStringCellValue());
-                            quejasData.setQuejasFecRecepcion(formatDate(row.getCell(5).getDateCellValue()));
-                            quejasData.setMedioId(String.valueOf((int) row.getCell(6).getNumericCellValue()));
-                            quejasData.setNivelATId(String.valueOf((int) row.getCell(7).getNumericCellValue()));
-                            quejasData.setProduct(row.getCell(8).getStringCellValue());
-                            if (row.getCell(9).getCellType() == CellType.NUMERIC) {
-                                // Si la celda contiene un valor numérico, lo convertimos a String                                     
-                                quejasData.setCausasId(String.valueOf(row.getCell(9).getNumericCellValue()));
-                            } else if (row.getCell(9).getCellType() == CellType.STRING) {
-                                // Si la celda contiene una cadena, la obtenemos directamente 
-                                quejasData.setCausasId(row.getCell(9).getStringCellValue());
-                            }                       
-                            quejasData.setQuejasPORI(row.getCell(10).getStringCellValue());
-                            quejasData.setEstadosId(String.valueOf((int) row.getCell(11).getNumericCellValue()));
-                            quejasData.setQuejasEstatus(String.valueOf((int) row.getCell(12).getNumericCellValue()));
-                            quejasData.setQuejasMunId(String.valueOf((int) row.getCell(13).getNumericCellValue()));
-                            quejasData.setQuejasLocId(String.valueOf((int) row.getCell(14).getNumericCellValue()));
-                            quejasData.setQuejasColId(String.valueOf((int) row.getCell(15).getNumericCellValue()));
-                            quejasData.setQuejasCP(String.valueOf((int) row.getCell(16).getNumericCellValue()));
-                            quejasData.setQuejasTipoPersona(String.valueOf((int) row.getCell(17).getNumericCellValue()));
-                            quejasData.setQuejasSexo(row.getCell(18).getStringCellValue());
-                            quejasData.setQuejasEdad(String.valueOf((int) row.getCell(19).getNumericCellValue()));
-                            quejasData.setQuejasFecResolucion(formatDate(row.getCell(20).getDateCellValue()));
-                            quejasData.setQuejasFecNotificacion(formatDate(row.getCell(21).getDateCellValue()));                            
-                            quejasData.setQuejasRespuesta(String.valueOf((int) row.getCell(22).getNumericCellValue()));
-                            quejasData.setQuejasNumPenal(String.valueOf((int) row.getCell(23).getNumericCellValue()));
-                            quejasData.setPenalizacionId(String.valueOf((int) row.getCell(24).getNumericCellValue()));
-
-                            quejasDataList.add(quejasData);
+                        	try {
+	                            // Ignorar la primera fila si contiene encabezados
+	                            if (row.getRowNum() == 0) continue;
+	    
+	                            QuejasData quejasData = new QuejasData();
+	                            
+	                            //!Corregir Mapeo   Cannot get a NUMERIC value from a STRING cell y orden de datos
+	                            quejasData.setQuejasDenominacion(row.getCell(0).getStringCellValue());
+	                            quejasData.setQuejasSector(row.getCell(1).getStringCellValue());
+	                            quejasData.setQuejasNoMes(String.valueOf((int) row.getCell(2).getNumericCellValue()));
+	                            quejasData.setQuejasNum(String.valueOf((int) row.getCell(3).getNumericCellValue()));
+	                            quejasData.setQuejasFolio(row.getCell(4).getStringCellValue());
+	                            quejasData.setQuejasFecRecepcion(formatDate(row.getCell(5).getDateCellValue()));
+	                            quejasData.setQuejasMedio(String.valueOf((int) row.getCell(6).getNumericCellValue()));
+	                            quejasData.setQuejasNivelAT(String.valueOf((int) row.getCell(7).getNumericCellValue()));
+	                            quejasData.setQuejasProducto(row.getCell(8).getStringCellValue());
+	                            if (row.getCell(9).getCellType() == CellType.NUMERIC) {
+	                                // Si la celda contiene un valor numérico, lo convertimos a String                                     
+	                                quejasData.setQuejasCausa(String.valueOf(row.getCell(9).getNumericCellValue()));
+	                            } else if (row.getCell(9).getCellType() == CellType.STRING) {
+	                                // Si la celda contiene una cadena, la obtenemos directamente 
+	                                quejasData.setQuejasCausa(row.getCell(9).getStringCellValue());
+	                            }                       
+	                            quejasData.setQuejasPORI(row.getCell(10).getStringCellValue());
+	                            quejasData.setQuejasEstatus(String.valueOf((int) row.getCell(11).getNumericCellValue()));
+	                            quejasData.setQuejasEstados(String.valueOf((int) row.getCell(12).getNumericCellValue()));
+	                            quejasData.setQuejasMunId(String.valueOf((int) row.getCell(13).getNumericCellValue()));
+	                            quejasData.setQuejasLocId(String.valueOf((int) row.getCell(14).getNumericCellValue()));
+	                            quejasData.setQuejasColId(String.valueOf((int) row.getCell(15).getNumericCellValue()));
+	                            quejasData.setQuejasCP(String.valueOf((int) row.getCell(16).getNumericCellValue()));
+	                            quejasData.setQuejasTipoPersona(String.valueOf((int) row.getCell(17).getNumericCellValue()));
+	                            quejasData.setQuejasSexo(row.getCell(18).getStringCellValue());
+	                            quejasData.setQuejasEdad(String.valueOf((int) row.getCell(19).getNumericCellValue()));
+	                            quejasData.setQuejasFecResolucion(formatDate(row.getCell(20).getDateCellValue()));
+	                            quejasData.setQuejasFecNotificacion(formatDate(row.getCell(21).getDateCellValue()));                            
+	                            quejasData.setQuejasRespuesta(String.valueOf((int) row.getCell(22).getNumericCellValue()));
+	                            quejasData.setQuejasNumPenal(String.valueOf((int) row.getCell(23).getNumericCellValue()));
+	                            quejasData.setQuejasPenalizacion(String.valueOf((int) row.getCell(24).getNumericCellValue()));
+	
+	                            quejasDataList.add(quejasData);
+                        	}catch(NullPointerException e) {
+                        		loggerRedeco.info(e.getMessage());
+                        	}
                         }
                         // cerrando el archivo
                         loggerRedeco.info("Cerrando el archivo " + archivo.getPath() + " -> " + urlNas + pathRedeco + urlHistorico + archivo.getName());
@@ -397,25 +417,13 @@ public class CondusefBussines {
                         }catch(Exception e) {
                         	loggerRedeco.info(e.getMessage());
                         }
-                        // Movemos el archivo al histórico
-                        loggerRedeco.info("Copiando archivo " + archivo.getPath());
-                        Path origenPath = FileSystems.getDefault().getPath(archivo.getPath());
-                        Path destinoPath = FileSystems.getDefault().getPath(urlNas + pathRedeco + urlHistorico + archivo.getName());
-                        // Crear la carpeta historico si no existe
-                        File historico = new File(urlNas + pathRedeco + urlHistorico);
-                        if (!historico.exists()) {
-                        	loggerRedeco.info("Creando direcotrio " + historico.getPath());
-                        	historico.mkdir();
-                        }
-                        // Movemos el archivo a la carpeta de histórico
-                        try {
-                            Files.move(origenPath, destinoPath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            loggerRedeco.info(e.getMessage());
-                        }
+                        // Agregamos el archivo a los procesados
+                        archivosProcesados.add(archivo);
                     } catch (IOException | EncryptedDocumentException e) {
                     	loggerRedeco.error("Error: " + e.getMessage());
-                    	e.printStackTrace();
+                    	for (StackTraceElement trace: e.getStackTrace()) {
+                    		loggerRedeco.error(trace.toString());
+                    	}
                     }
                 }
             }
@@ -427,8 +435,9 @@ public class CondusefBussines {
     }
 
     
-
-    // Creamos nuestro filtro de archivos o ficheros
+    /**
+     * Creamos nuestro filtro de archivos o ficheros
+     */
     FileFilter archivosFilter = new FileFilter() {
         //Sobreescribimos el método
         public boolean accept(File file) {
@@ -437,13 +446,23 @@ public class CondusefBussines {
         	// Nombre del archivo los nombres aceptados son: 
             // REDECO_QUEJAS.xlsx, REDECO_QUEJAS_[YYYYMMDD].xlsx, REDECO_QUEJAS_[YYYYMMDDHHMM].xlsx        
         	if (file.getPath().toUpperCase().indexOf("REDECO") > 0) {
-            	nombreArchivoEsperado = ConfigConstants.REG_EXP_QUEJAS_REDECO;
-            	//loggerRedeco.info("nombreArchivoEsperado: " + nombreArchivoEsperado);
+        		// obtiene la expresión regular para quejas de redeco Sabadell
+        		if (getRazonSocial().trim().toUpperCase().equals("SABADELL"))
+        			nombreArchivoEsperado = ConfigConstants.getRegExpQuejasRedecoSabadell();
+        		// obtiene la expresión regular para quejas de redeco Sofom
+        		if (getRazonSocial().trim().toUpperCase().equals("SOFOM"))
+        			nombreArchivoEsperado = ConfigConstants.getRegExpQuejasRedecoSofom();
+            	loggerRedeco.info("nombreArchivoEsperado: " + nombreArchivoEsperado);
         	// Nombre del archivo los nombres aceptados son: 
             // REPORTE REUNE CONSULTAS.xlsx, REPORTE REUNE CONSULTAS_[YYYYMMDD].xlsx, REPORTE REUNE CONSULTAS_[YYYYMMDDHHMM].xlsx
         	}else {
-        		nombreArchivoEsperado = ConfigConstants.REG_EXP_QUEJAS_REUNE;
-            	//loggerReune.info("nombreArchivoEsperado: " + nombreArchivoEsperado);
+        		// obtiene la expresión regular para quejas de redeco Sabadell
+        		if (getRazonSocial().trim().toUpperCase().equals("SABADELL"))
+        			nombreArchivoEsperado = ConfigConstants.getRegExpQuejasReuneSabadell();
+        		if (getRazonSocial().trim().toUpperCase().equals("SOFOM"))
+        			nombreArchivoEsperado = ConfigConstants.getRegExpQuejasReuneSofom();
+
+            	loggerReune.info("nombreArchivoEsperado: " + nombreArchivoEsperado);
         	}
         	if (file.getName().matches(nombreArchivoEsperado)) {
                 return true;
@@ -452,6 +471,11 @@ public class CondusefBussines {
         }
     };
 
+    /**
+     * Método para la lectura de un archivo xls y recuperar un alista de consultas REUNE.
+     * @return Lista de consultas REUNE.
+     * @throws Exception Excepción generada en caso de algun error en la lectura del archivo.
+     */
     public List<ConsultaData> parseDocumentToBenXlsxReune() throws Exception {
         loggerReune.info("pathRedeco: " + pathRedeco);
     	List<File> archivosEnDirectorio = findDocument(pathReune);
@@ -539,29 +563,13 @@ public class CondusefBussines {
                         }catch(Exception e) {
                         	loggerReune.info(e.getMessage());
                         }
-
-                          // Movemos el archivo al histórico
-                          loggerReune.info("Copiando archivo " + archivo.getPath());
-
-                          Path origenPath = FileSystems.getDefault().getPath(archivo.getPath());
-                          Path destinoPath = FileSystems.getDefault().getPath(urlNas + pathReune + urlHistorico + archivo.getName());
-
-                          // Crear la carpeta historico si no existe
-                        File historico = new File(urlNas + pathReune + urlHistorico);
-                        if (!historico.exists()) {
-                        	loggerRedeco.info("Creando direcotrio " + historico.getPath());
-                        	historico.mkdir();
-                        }
-                         // Movemos el archivo a la carpeta de histórico
-                         try {
-                            Files.move(origenPath, destinoPath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            loggerRedeco.info(e.getMessage());
-                        }
+                        archivosProcesados.add(archivo);
 
                     } catch (IOException | EncryptedDocumentException e) {
                         loggerReune.error("Error: " + e.getMessage());
-                    	e.printStackTrace();
+                    	for (StackTraceElement trace: e.getStackTrace()) {
+                    		loggerRedeco.error(trace.toString());
+                    	}
                     }
                 }
             }
@@ -573,6 +581,12 @@ public class CondusefBussines {
         return consultasList;
     }
     
+    /**
+     * Método par ala busqueda de un archivo. 
+     * @param pathNasDirectoriReuneOrRedeco Directorio donde se buscará el archivo.
+     * @return Lista de archivos encontrados.
+     * @throws Exception Excepción en caso de que se genere un error al leer directorio.
+     */
     public List<File> findDocument(String pathNasDirectoriReuneOrRedeco) throws Exception{
         // Directorio donde se copian los archivos
         File directorioCsv = new File(urlNas + pathNasDirectoriReuneOrRedeco);
@@ -654,10 +668,31 @@ public class CondusefBussines {
 
     }
 
+    /**
+     * Método para dar formato a una fecha.
+     * @param fecha Fecha a formatear.
+     * @return Regresa la fecha con formato dd/mm/yyyy
+     */
     public String formatDate (Date fecha){
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String fechaFormateada = dateFormat.format(fecha);
         return fechaFormateada;
     }
+
+    /**
+     * Obtiene la razón social que ejecuta el proceso
+     * @return Razón social que ejecuta el proceso
+     */
+	public String getRazonSocial() {
+		return razonSocial;
+	}
+
+	/**
+	 * Define la razón social que ejecuta el proceso.
+	 * @param razonSocial Razón social que ejecuta el proceso
+	 */
+	public void setRazonSocial(String razonSocial) {
+		this.razonSocial = razonSocial;
+	}
     
 }

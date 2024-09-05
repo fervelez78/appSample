@@ -1,8 +1,6 @@
 
 package bantotal.dlya.com.uy.btsoa;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
@@ -27,9 +25,19 @@ import mx.bancosabadell.condusef.Condusef;
 public class Authenticate
     extends Service
 {
-
+	/**
+	 * URL de wsdl para la autenticación.
+	 */
     private final static URL AUTHENTICATE_WSDL_LOCATION;
+    
+    /**
+     * Excepción web generada.
+     */
     private final static WebServiceException AUTHENTICATE_EXCEPTION;
+    
+    /**
+     * Objeto QName del método de autenticación.
+     */
     private final static QName AUTHENTICATE_QNAME = new QName("http://uy.com.dlya.bantotal/BTSOA/", "Authenticate");
 
     static {
@@ -54,32 +62,59 @@ public class Authenticate
         AUTHENTICATE_EXCEPTION = e;
     }
 
+    /**
+     * Constructor para la autenticación de forma genérica.
+     */
     public Authenticate() {
         super(__getWsdlLocation(), AUTHENTICATE_QNAME);
     }
 
+    /**
+     * Construtor para la autenticación indicando las características.
+     * @param features Lista de características.
+     */
     public Authenticate(WebServiceFeature... features) {
         super(__getWsdlLocation(), AUTHENTICATE_QNAME, features);
     }
 
+    /**
+     * Constructor para la autenticación indicando la localización wsdl. 
+     * @param wsdlLocation URL del WSDL.
+     */
     public Authenticate(URL wsdlLocation) {
         super(wsdlLocation, AUTHENTICATE_QNAME);
     }
 
+    /**
+     * Constructor para la autenticación indicando la localización wsdl y caracteríticas.
+     * @param wsdlLocation URL del WSDL.
+     * @param features Lista de características.
+     */
     public Authenticate(URL wsdlLocation, WebServiceFeature... features) {
         super(wsdlLocation, AUTHENTICATE_QNAME, features);
     }
 
+    /**
+     * Constructor para la autenticación indicando la localización wsdl y nombre de servicio.
+     * @param wsdlLocation URL del WSDL.
+     * @param serviceName Nombre del servicio.
+     */
     public Authenticate(URL wsdlLocation, QName serviceName) {
         super(wsdlLocation, serviceName);
     }
 
+    /**
+     * Constructor para la autenticación indicando la localización wsdl, nombre de servicio y características.
+     * @param wsdlLocation URL del WSDL.
+     * @param serviceName Nombre del servicio.
+     * @param features Lista de características.
+     */
     public Authenticate(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
         super(wsdlLocation, serviceName, features);
     }
 
     /**
-     * 
+     * Método para obtener el servicio para la autenticación.
      * @return
      *     returns AuthenticateSoapPort
      */
@@ -89,7 +124,7 @@ public class Authenticate
     }
 
     /**
-     * 
+     * Método para obtener el servicio para la autenticación indicando las características.
      * @param features
      *     A list of {@link javax.xml.ws.WebServiceFeature} to configure on the proxy.  Supported features not in the <code>features</code> parameter will have their default values.
      * @return
@@ -100,6 +135,10 @@ public class Authenticate
         return super.getPort(new QName("http://uy.com.dlya.bantotal/BTSOA/", "AuthenticateSoapPort"), AuthenticateSoapPort.class, features);
     }
 
+    /**
+     * Método para obtener la URL del wsdl.
+     * @return
+     */
     private static URL __getWsdlLocation() {
         if (AUTHENTICATE_EXCEPTION!= null) {
             throw AUTHENTICATE_EXCEPTION;

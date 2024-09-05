@@ -22,6 +22,8 @@ public class ResponseReune {
         @JsonProperty("Número total de envios")
         private int numeroTotalDeEnvios;
         
+        private String message;
+
         private String error;
         
         private List<String> errores;

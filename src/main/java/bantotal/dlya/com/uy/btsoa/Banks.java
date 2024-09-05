@@ -33,7 +33,10 @@ import javax.xml.bind.annotation.XmlType;
     "sbsBank"
 })
 public class Banks {
-
+	
+	/**
+	 * sbsBank property.
+	 */
     @XmlElement(name = "sBSBank")
     protected List<SBSBank> sbsBank;
 

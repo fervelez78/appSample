@@ -34,6 +34,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class BusinessLinks {
 
+	/**
+	 * sbsCompanyLink List property.
+	 */
     @XmlElement(name = "sBSCompanyLink")
     protected List<SBSCompanyLink> sbsCompanyLink;
 

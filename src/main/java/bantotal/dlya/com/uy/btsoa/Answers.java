@@ -34,6 +34,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Answers {
 
+	/**
+	 * Lista de respuestas de seguridad.
+	 */
     @XmlElement(name = "sBSSecurityAnswer")
     protected List<SBSSecurityAnswer> sbsSecurityAnswer;
 

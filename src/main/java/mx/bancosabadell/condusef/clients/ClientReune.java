@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
+import mx.bancosabadell.condusef.entity.TokenResponse;
+import mx.bancosabadell.condusef.entity.UserRequest;
 import mx.bancosabadell.condusef.exceptions.ErrorInfoResponse;
 import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
@@ -21,17 +23,64 @@ import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
+/**
+ * Objeto para el uso de la API de REUNE.
+ */
 public class ClientReune extends ClientConducef{
     
+	/**
+     * Logger de REUNE. 
+     */
     private static final Logger logger = LoggerFactory.getLogger("clientReuneLogger");
     
-    private String tokenAccess = ConfigConstants.TOKEN_CONDUSEF;
-    
-    private CondusefBussines condusefBussines = new CondusefBussines();
+    /**
+     * Objeto de negocio de CONDUSEF.
+     */
+    private CondusefBussines condusefBussines;
 
-    public ResponseReune postConsultasGeneral() throws Exception {
+    /**
+     * Método para obtener el token del servicio de REUNE.
+     * @return Token recuperado.
+     * @throws Exception Error generado al consumir el servicio de token de REUNE.
+     */
+    public String getToken() throws Exception {
+
+    	logger.info("Entrnado a getToken");
+    	
+		UserRequest user = null;
+		ObjectMapper mapper = new ObjectMapper();
+    	if (getRazonSocial().trim().toUpperCase().equals("SABADELL")) {
+    		user = new UserRequest(ConfigConstants.getUserNameReuneSabadell(), ConfigConstants.getPasswordReuneSabadell());
+    	}
+        
+    	if (getRazonSocial().trim().toUpperCase().equals("SOFOM")) {
+    		user = new UserRequest(ConfigConstants.getUserNameReuneSofom(), ConfigConstants.getPasswordReuneSofom());
+    	}
+
+    	        
+		String json = mapper.writeValueAsString(user);
+
+		logger.info("JSON: {}", json);
+		logger.info("URL Token: {}", ConfigConstants.getUrlTokenReune());
+		logger.info("PATH Token: {}", ConfigConstants.getPathTokenReune());
+        // Realizar la petición HTTP
+        String response = get(ConfigConstants.getUrlTokenReune(), ConfigConstants.getPathTokenReune(), json);
+		TokenResponse token = mapper.readValue(response, TokenResponse.class);
+		logger.info("Mensaje: " + token.getMsg());
+		logger.info("Token: " + token.getUser().getToken_access());
+		return token.getUser().getToken_access();		
+    }
+
+    /**
+     * Método para el consumo del servicio de REUNE para el envío de consultas.
+     * @return Respuesta de REUNE.
+     * @throws Exception Error generado al consumir el servicio.
+     */
+    public ResponseReune postConsultasGeneral(String razonSocial) throws Exception {
         logger.info("INICIO CARGA Reune " + pathReune);
 
+        setRazonSocial(razonSocial);
+        condusefBussines = new CondusefBussines(razonSocial);
 
         List<ConsultaData> listConsultas = condusefBussines.parseDocumentToBenXlsxReune();
 
@@ -46,13 +95,17 @@ public class ClientReune extends ClientConducef{
          // Verificar si hay errores de validación
          if (responseReune.getErrorsValidate() == null && responseReune.getError() == null) {
             try {
-                 // Serializar a JSON usando Jackson
-                 ObjectMapper objectMapper = new ObjectMapper();
-                 objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
-                 String requestConsultaTojson = objectMapper.writeValueAsString(responseReune.getConsultas());
+                // Serializar a JSON usando Jackson
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setPropertyNamingStrategy(new CustomPropertyNamingStrategy());
+                String requestConsultaTojson = objectMapper.writeValueAsString(responseReune.getConsultas());
+                
+                // Obtenemos un nuevo token
+            	logger.info("Antes de obtener el token" );
+                String tokenAccess = getToken();
+                logger.info("Despues de obtener el token: {}", tokenAccess);
 
-                 
-                logger.info("Request del cliente: " + requestConsultaTojson);
+                logger.info("Request del cliente: {}", requestConsultaTojson);
 
                 // Crear el request que se mandará en la petición http
                 RequestBody requestBody = RequestBody.create(requestConsultaTojson, MediaType.parse("application/json; charset=utf-8"));
@@ -72,7 +125,9 @@ public class ClientReune extends ClientConducef{
                         }
                     
                }
-               logger.info("Respuesta reune codigo estado " + response.getCode() + " - endpoint: " + ConfigConstants.URL_API_REUNE);
+               logger.info("Respuesta reune codigo estado " + response.getCode() + " - endpoint: " + ConfigConstants.getUrlApiReune());
+               if (response.getCode() == 200)
+            	   logger.info("Mensaje: " + response.getMessage());
 
             } catch (JsonProcessingException e) {
                 // Manejar errores de procesamiento JSON
@@ -95,7 +150,7 @@ public class ClientReune extends ClientConducef{
                 handleUnexpectedException(e, responseReune);
             }
         
-	        logger.info("REUNE " + ConfigConstants.URL_API_REUNE);
+	        logger.info("REUNE " + ConfigConstants.getUrlApiReune());
 	        logger.info("FIN CARGA Reune");
 	    }else{
 	        logger.info("Se obtivieron errores en el archivo");
@@ -104,6 +159,12 @@ public class ClientReune extends ClientConducef{
 	    return responseReune; 
 	    
     }
+    
+    /**
+     * Método para dispersar el error en el comsumo del servicio de REUNE.
+     * @param e Excepción generada.
+     * @param responseReune Respuesta de REUNE. 
+     */
     private void handleJsonProcessingException(JsonProcessingException e, ResponseReune responseReune) {
         String errorMessage = "Error de procesamiento JSON: " + e.getMessage();
     	logger.error("Error al procesar el objeto a JSON: {}", e.getMessage(), e);
@@ -114,6 +175,11 @@ public class ClientReune extends ClientConducef{
         responseReune.getErrores().add(errorMessage);
     }
     
+    /**
+     * Método para dispersar el error en el comsumo del servicio de REUNE.
+     * @param e Excepción generada.
+     * @param responseReune Respuesta del servicio de REUNE.
+     */
     private void handleHttpResponseException(HttpResponseException e, ResponseReune responseReune) {
         String errorMessage = "Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" + e.getResponseBody();
         logger.error(errorMessage);

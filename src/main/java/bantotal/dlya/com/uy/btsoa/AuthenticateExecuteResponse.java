@@ -40,12 +40,27 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "Authenticate.ExecuteResponse")
 public class AuthenticateExecuteResponse {
 
+	/**
+	 * btinreq property.
+	 */
     @XmlElement(name = "Btinreq", required = true)
     protected SBTInReq btinreq;
+    
+    /**
+     * sessionToken property.
+     */
     @XmlElement(name = "SessionToken", required = true)
     protected String sessionToken;
+    
+    /**
+     * erroresnegocio property.
+     */
     @XmlElement(name = "Erroresnegocio", required = true)
     protected SBTErroresNegocio erroresnegocio;
+    
+    /**
+     * btoutreq property.
+     */
     @XmlElement(name = "Btoutreq", required = true)
     protected SBTOutReq btoutreq;
 
