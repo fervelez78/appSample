@@ -28,6 +28,8 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 
 import mx.bancosabadell.condusef.config.ConfigConstants;
+import mx.bancosabadell.condusef.models.Aclaracion;
+import mx.bancosabadell.condusef.models.AclaracionData;
 import mx.bancosabadell.condusef.models.Consulta;
 import mx.bancosabadell.condusef.models.ConsultaData;
 import mx.bancosabadell.condusef.models.InfoValidate;
@@ -35,6 +37,7 @@ import mx.bancosabadell.condusef.models.Queja;
 import mx.bancosabadell.condusef.models.QuejasData;
 import mx.bancosabadell.condusef.models.ResponseRedeco;
 import mx.bancosabadell.condusef.models.ResponseReune;
+import mx.bancosabadell.condusef.models.ResponseReuneAclaraciones;
 
 /**
  * Clase para establecer el negocio de Condusef.
@@ -126,7 +129,7 @@ public class CondusefBussines {
                 queja.setQuejasColId(Integer.parseInt(quejasData.getQuejasColId()));
                 queja.setQuejasCP(Integer.parseInt(quejasData.getQuejasCP()));
                 queja.setQuejasTipoPersona(Integer.parseInt(quejasData.getQuejasTipoPersona())); // Persona Física
-                // El sexo y edad solo aplica pra persona física
+                // El sexo y edad solo aplica para persona física
                 if (queja.getQuejasTipoPersona() != 2) { 
 	                queja.setQuejasSexo(quejasData.getQuejasSexo());
 	                queja.setQuejasEdad(Integer.parseInt(quejasData.getQuejasEdad()));
@@ -186,6 +189,60 @@ public class CondusefBussines {
         }
         return responseReune;
     }
+    
+    /**
+     * Método para el mapeo de una lista AclaracionData a un ResponseReune.
+     * @param AclaracionData Lista de aclaraciones leidas de un archivo.
+     * @return Estrucutra ResponseReune
+     */
+    public ResponseReuneAclaraciones mapperDocumentAclaracion(List<AclaracionData> aclaracionDataList) {
+        ResponseReuneAclaraciones responseReuneAclaraciones = new ResponseReuneAclaraciones();
+        List<InfoValidate> listInfoValidate = new ArrayList<>();
+        List<Aclaracion> aclaracionList = new ArrayList<>();
+
+        try {
+            for (AclaracionData aclaracionData : aclaracionDataList) {
+                Aclaracion aclaracion = new Aclaracion();
+                aclaracion.setAclaracionDenominacion(aclaracionData.getAclaracionDenominacion());
+                aclaracion.setAclaracionSector(aclaracionData.getAclaracionSector());
+                aclaracion.setAclaracionTrimestre(aclaracionData.getAclaracionTrimestre());
+                aclaracion.setAclaracionNumero(aclaracionData.getAclaracionNumero());
+                aclaracion.setAclaracionFolioAtencion(aclaracionData.getAclaracionFolioAtencion());
+                aclaracion.setAclaracionEstadoConPend(aclaracionData.getAclaracionEstadoConPend());
+                aclaracion.setAclaracionFechaAclaracion(aclaracionData.getAclaracionFechaAclaracion());
+                aclaracion.setAclaracionFechaAtencion(aclaracionData.getAclaracionFechaAtencion());
+                aclaracion.setAclaracionMedioRecepcionCanal(aclaracionData.getAclaracionMedioRecepcionCanal());
+                aclaracion.setAclaracionProductoServicio(aclaracionData.getAclaracionProductoServicio());
+                aclaracion.setAclaracionCausaMotivo(aclaracionData.getAclaracionCausaMotivo());
+                aclaracion.setAclaracionFechaResolucion(aclaracionData.getAclaracionFechaResolucion());
+                aclaracion.setAclaracionFechaNotifiUsuario(aclaracionData.getAclaracionFechaNotifiUsuario());
+                aclaracion.setAclaracionEntidadFederativa(aclaracionData.getAclaracionEntidadFederativa());
+                aclaracion.setAclaracionCodigoPostal(aclaracionData.getAclaracionCodigoPostal());
+                aclaracion.setAclaracionMunicipioAlcaldia(aclaracionData.getAclaracionMunicipioAlcaldia());
+                aclaracion.setAclaracionLocalidad(aclaracionData.getAclaracionLocalidad());
+                aclaracion.setAclaracionColonia(aclaracionData.getAclaracionColonia());
+                aclaracion.setAclaracionMonetario(aclaracionData.getAclaracionMonetario());
+                aclaracion.setAclaracionMontoReclamado(aclaracionData.getAclaracionMontoReclamado());
+                aclaracion.setAclaracionPori(aclaracionData.getAclaracionPori());
+                aclaracion.setAclaracionTipoPersona(aclaracionData.getAclaracionTipoPersona());
+                aclaracion.setAclaracionSexo(aclaracionData.getAclaracionSexo());
+                aclaracion.setAclaracionEdad(aclaracionData.getAclaracionEdad());
+                aclaracion.setAclaracionNivelAtencion(aclaracionData.getAclaracionNivelAtencion());
+                aclaracion.setAclaracionFolioCondusef(aclaracionData.getAclaracionFolioCondusef());
+                aclaracion.setAclaracionReversa(aclaracionData.getAclaracionReversa());
+                aclaracion.setAclaracionOperacionExtranjero(aclaracionData.getAclaracionOperacionExtranjero());
+
+                // Validar la aclaracion antes de agregarla a la lista
+                loggerReune.info("Cargando aclaracion " + aclaracion.getAclaracionFolioAtencion());
+                responseReuneAclaraciones = validateAclaracion(aclaracion, responseReuneAclaraciones, listInfoValidate, aclaracionList);
+
+            }
+        } catch (Exception e) {
+            loggerRedeco.error("Error: " + e.getMessage());
+            handleUnexpectedException(e, responseReuneAclaraciones);
+        }
+        return responseReuneAclaraciones;
+    }
 
     /**
      * Método para generar un error en la lectura de archivo.
@@ -211,6 +268,19 @@ public class CondusefBussines {
         List<Consulta> consultas = new ArrayList<>();
         responseReune.setConsultas(consultas);
         responseReune.setError(errorMessage);
+    }
+    
+    /**
+     * Método para generar un error en la lectura de archivo.
+     * @param e Excepción generada.
+     * @param responseReuneAclaraciones Resultado del servicio REUNE ACLARACIONES.
+     */
+    private void handleUnexpectedException(Exception e, ResponseReuneAclaraciones responseReuneAclaraciones) {
+        String errorMessage = "Error inesperado: " + "No se encontro archivo REPORTE_REUNE_ACLARACIONES.xlsx";
+        loggerReune.error(errorMessage);
+        List<Aclaracion> aclaraciones = new ArrayList<>();
+        responseReuneAclaraciones.setAclaraciones(aclaraciones);
+        responseReuneAclaraciones.setError(errorMessage);
     }
 
     /**
@@ -300,6 +370,49 @@ public class CondusefBussines {
         }
     
         return responseReune;
+    }
+    
+    /**
+     * Método para la validación de un registro de aclaraciones.
+     * @param aclaracion Aclaracion a validar.
+     * @param responseReuneAclaraciones Respuesta del servicio REUNE.
+     * @param listInfoValidate Lista de validaciones.
+     * @param aclaracionList Lista de aclaraciones.
+     * @return Respuesta de REUNE.
+     */
+    public ResponseReuneAclaraciones validateAclaracion(Aclaracion aclaracion, ResponseReuneAclaraciones responseReuneAclaraciones, List<InfoValidate> listInfoValidate, List<Aclaracion> aclaracionList) {
+        try {
+            ValidatorFactory validatorFactory = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory();
+    
+            Validator validator = validatorFactory.getValidator();
+    
+            Set<ConstraintViolation<Aclaracion>> violations = validator.validate(aclaracion);
+    
+            if (!violations.isEmpty()) {
+            	responseReuneAclaraciones.setErrorsValidate(listInfoValidate);
+                for (ConstraintViolation<Aclaracion> violation : violations) {
+    
+                    InfoValidate errorinfoValidate = new InfoValidate("Error en consulta con Folio: " + aclaracion.getAclaracionFolioCondusef() + "\n" + "Mensaje: " + violation.getMessage());
+                    responseReuneAclaraciones.getErrorsValidate().add(errorinfoValidate);
+                    loggerReune.info(errorinfoValidate.getMessageError());
+                }
+            } else {
+            	responseReuneAclaraciones.setAclaraciones(aclaracionList);
+                responseReuneAclaraciones.getAclaraciones().add(aclaracion);
+                loggerReune.info("La carga de la consulta con folio " + aclaracion.getAclaracionFolioCondusef() + " fue correcta");
+            }
+        } catch (Exception e) {
+            InfoValidate errorinfoValidate = new InfoValidate("Error al procesar las consultas" + e.getCause());
+    
+            responseReuneAclaraciones.getErrorsValidate().add(errorinfoValidate);
+            loggerReune.error("Error al procesar las consultas", e.getCause());
+    
+        }
+    
+        return responseReuneAclaraciones;
     }
     
     /**

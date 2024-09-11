@@ -17,6 +17,7 @@ import mx.bancosabadell.condusef.exceptions.HttpResponseException;
 import mx.bancosabadell.condusef.exceptions.NetworkException;
 import mx.bancosabadell.condusef.models.ConsultaData;
 import mx.bancosabadell.condusef.models.ResponseReune;
+import mx.bancosabadell.condusef.models.ResponseReuneAclaraciones;
 import mx.bancosabadell.condusef.models.ResponseService;
 import mx.bancosabadell.condusef.services.CondusefBussines;
 import mx.bancosabadell.condusef.services.CustomPropertyNamingStrategy;
@@ -209,5 +210,48 @@ public class ClientReune extends ClientConducef{
         if (responseReune.getErrores() == null)
         	responseReune.setErrores(new ArrayList<String>());
         responseReune.getErrores().add(errorMessage);
+    }
+    
+    //trabajar sobre esta captura de excepciones 
+    private void handleException(String errorMessage, Exception e, Object response) {
+        logger.error(errorMessage, e);
+        if (response instanceof ResponseReuneAclaraciones) {
+            ResponseReuneAclaraciones responseReuneAclaraciones = (ResponseReuneAclaraciones) response;
+            responseReuneAclaraciones.getAclaraciones().clear();
+            responseReuneAclaraciones.setError(errorMessage);
+            if (responseReuneAclaraciones.getErrores() == null) {
+                responseReuneAclaraciones.setErrores(new ArrayList<String>());
+            }
+            responseReuneAclaraciones.getErrores().add(errorMessage);
+        } else if (response instanceof ResponseReuneAclaraciones) {
+            ResponseReuneAclaraciones responseReuneAclaraciones = (ResponseReuneAclaraciones) response;
+            responseReuneAclaraciones.getAclaraciones().clear();
+            responseReuneAclaraciones.setError(errorMessage);
+            if (responseReuneAclaraciones.getErrores() == null) {
+                responseReuneAclaraciones.setErrores(new ArrayList<String>());
+            }
+            responseReuneAclaraciones.getErrores().add(errorMessage);
+        }
+       
+    }
+    
+    private void handleJsonProcessingException(JsonProcessingException e, Object response) {
+        String errorMessage = "Error de procesamiento JSON: " + e.getMessage();
+        handleException(errorMessage, e, response);
+    }
+   
+    private void handleHttpResponseException(HttpResponseException e, Object response) {
+        String errorMessage = "Error HTTP: " + e.getStatusCode() + " - " + e.getMessage() + ":" + e.getResponseBody();
+        handleException(errorMessage, e, response);
+    }
+   
+    private void handleNetworkException(NetworkException e, Object response) {
+        String errorMessage = "Error de red: " + e.getDetail() + " - " + e.getMessage();
+        handleException(errorMessage, e, response);
+    }
+   
+    private void handleUnexpectedException(Exception e, Object response) {
+        String errorMessage = "Error inesperado: " + e;
+        handleException(errorMessage, e, response);
     }
 }
